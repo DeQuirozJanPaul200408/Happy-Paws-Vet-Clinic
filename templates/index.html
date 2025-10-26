@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome to Happy Paws Vet Clinic!</h2>
+<p>We care for your pets like family. Book an appointment today!</p>
+
+<section>
+    <h3>Our Services</h3>
+    <div class="cards">
+        {% for s in services %}
+        <div class="card">
+            <h4>{{ s.title }}</h4>
+            <p>{{ s.desc }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h3>Meet Our Staff</h3>
+    <div class="cards">
+        {% for person in staff %}
+        <div class="card">
+            <h4>{{ person.name }}</h4>
+            <p><strong>{{ person.role }}</strong></p>
+            <p>{{ person.bio }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ title }}</h2>
+
+<form method="POST" action="{{ form_action }}">
+    {{ form.hidden_tag() }}
+
+    <label for="pet_id">{{ form.pet_id.label.text }}</label>
+    {{ form.pet_id(class="form-control") }}
+
+    <label for="service">{{ form.service.label.text }}</label>
+    {{ form.service(class="form-control") }}
+
+    <label for="scheduled_at">{{ form.scheduled_at.label.text }}</label>
+    {{ form.scheduled_at(class="form-control", type="datetime-local") }}
+
+    <label for="notes">{{ form.notes.label.text }}</label>
+    {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
+
+    {{ form.submit(class="btn") }}
+</form>
+{% endblock %}

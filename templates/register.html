@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create an Account</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <label>{{ form.name.label }}</label>
+    {{ form.name(class="form-control") }}
+
+    <label>{{ form.email.label }}</label>
+    {{ form.email(class="form-control") }}
+
+    <label>{{ form.password.label }}</label>
+    {{ form.password(class="form-control") }}
+
+    <label>{{ form.password2.label }}</label>
+    {{ form.password2(class="form-control") }}
+
+    {{ form.submit(class="btn") }}
+</form>
+
+<p>Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+{% endblock %}

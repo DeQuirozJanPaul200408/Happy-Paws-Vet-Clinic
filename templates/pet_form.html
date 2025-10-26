@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ title }}</h2>
+
+<form method="POST" action="{{ form_action }}">
+    {{ form.hidden_tag() }}
+    
+    <label>{{ form.name.label }}</label>
+    {{ form.name(class="form-control") }}
+    
+    <label>{{ form.breed.label }}</label>
+    {{ form.breed(class="form-control") }}
+    
+    <label>{{ form.age.label }}</label>
+    {{ form.age(class="form-control") }}
+    
+    <label>{{ form.medical_history.label }}</label>
+    {{ form.medical_history(class="form-control") }}
+    
+    {{ form.submit(class="btn") }}
+</form>
+{% endblock %}
