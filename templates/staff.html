@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Meet Our Veterinary Team</h2>
-
-<div class="cards">
+<div class="row mt-3">
     {% for member in staff %}
-    <div class="card">
-        <h3>{{ member.name }}</h3>
-        <p><strong>{{ member.role }}</strong></p>
-        <p>{{ member.bio }}</p>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ member.name }}</h5>
+                <p><strong>{{ member.role }}</strong></p>
+                <p>{{ member.bio }}</p>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>

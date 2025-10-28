@@ -19,6 +19,7 @@ login_manager.login_view = 'login'
 
 csrf = CSRFProtect(app)
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -62,7 +63,8 @@ SERVICES = [
 
 STAFF = [
     {'name': 'Jan Paul E. De Quiroz', 'role': 'Senior Veterinarian', 'bio': 'Expert in animal health and wellness with years of dedicated service.'},
-    {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'}, {'name': 'Zuriel Pecadero', 'role': 'Help Desk.', 'bio': 'Helps you for your inquiries.'},
+    {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'},
+    {'name': 'Zuriel Pecadero', 'role': 'Help Desk', 'bio': 'Helps you for your inquiries.'},
 ]
 
 
@@ -277,6 +279,16 @@ def appointment_delete(id):
     db.session.commit()
     flash('Appointment deleted successfully!', 'info')
     return redirect(url_for('appointments_list'))
+
+
+# 👇 NEW ROUTE TO VIEW DATABASE CONTENTS
+@app.route('/showdata')
+@login_required
+def show_data():
+    users = User.query.all()
+    pets = Pet.query.all()
+    appointments = Appointment.query.all()
+    return render_template('showdata.html', users=users, pets=pets, appointments=appointments)
 
 
 @app.route('/services')
