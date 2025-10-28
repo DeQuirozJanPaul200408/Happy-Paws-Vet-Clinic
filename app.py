@@ -10,8 +10,13 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'dev-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vetclinic.db'
+
+# ----------------- CHANGE TO MYSQL -----------------
+# Make sure you have created a database named 'vetclinic' in MySQL
+# Replace 'root', '', and 'localhost' if needed
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/vetclinic'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ---------------------------------------------------
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -19,6 +24,7 @@ login_manager.login_view = 'login'
 
 csrf = CSRFProtect(app)
 
+# ------------------- MODELS -------------------
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -33,7 +39,6 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-
 class Pet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
@@ -42,7 +47,6 @@ class Pet(db.Model):
     medical_history = db.Column(db.Text)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     appointments = db.relationship('Appointment', backref='pet', lazy=True, cascade="all, delete")
-
 
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -53,7 +57,6 @@ class Appointment(db.Model):
     notes = db.Column(db.Text)
     status = db.Column(db.String(30), default='Scheduled')
 
-
 SERVICES = [
     {'title': 'Wellness Checkup', 'desc': 'Routine physical exam and health check.'},
     {'title': 'Vaccination', 'desc': 'Core vaccines and booster shots.'},
@@ -62,10 +65,11 @@ SERVICES = [
 
 STAFF = [
     {'name': 'Jan Paul E. De Quiroz', 'role': 'Senior Veterinarian', 'bio': 'Expert in animal health and wellness with years of dedicated service.'},
-    {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'}, {'name': 'Zuriel Pecadero', 'role': 'Help Desk.', 'bio': 'Helps you for your inquiries.'},
+    {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'}, 
+    {'name': 'Zuriel Pecadero', 'role': 'Help Desk.', 'bio': 'Helps you for your inquiries.'},
 ]
 
-
+# ------------------- FORMS -------------------
 class RegistrationForm(FlaskForm):
     name = StringField('Full Name', validators=[DataRequired(), Length(2, 80)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -73,12 +77,10 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
-
 
 class PetForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -87,7 +89,6 @@ class PetForm(FlaskForm):
     medical_history = TextAreaField('Medical History', validators=[Optional()])
     submit = SubmitField('Save')
 
-
 class AppointmentForm(FlaskForm):
     pet_id = SelectField('Pet', coerce=int, validators=[DataRequired()])
     service = SelectField('Service', choices=[(s['title'], s['title']) for s in SERVICES])
@@ -95,11 +96,9 @@ class AppointmentForm(FlaskForm):
     notes = TextAreaField('Notes', validators=[Optional()])
     submit = SubmitField('Save')
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
 
 @app.before_request
 def create_tables_once():
@@ -107,11 +106,10 @@ def create_tables_once():
         db.create_all()
         app.db_initialized = True
 
-
+# ------------------- ROUTES -------------------
 @app.route('/')
 def index():
     return render_template('index.html', services=SERVICES, staff=STAFF)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -128,7 +126,6 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -140,7 +137,6 @@ def login():
         flash('Invalid credentials.', 'danger')
     return render_template('login.html', form=form)
 
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -148,18 +144,15 @@ def logout():
     flash('Logged out.', 'info')
     return redirect(url_for('index'))
 
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html', pets=current_user.pets, appointments=current_user.appointments)
 
-
 @app.route('/pets')
 @login_required
 def pets_list():
     return render_template('pets.html', pets=current_user.pets)
-
 
 @app.route('/pets/new', methods=['GET', 'POST'])
 @login_required
@@ -173,7 +166,6 @@ def pet_new():
         flash('Pet added successfully.', 'success')
         return redirect(url_for('pets_list'))
     return render_template('pet_form.html', form=form, title='Add Pet', form_action=url_for('pet_new'))
-
 
 @app.route('/pets/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -192,7 +184,6 @@ def pet_edit(id):
         return redirect(url_for('pets_list'))
     return render_template('pet_form.html', form=form, title='Edit Pet', form_action=url_for('pet_edit', id=id))
 
-
 @app.route('/pets/<int:id>/delete', methods=['POST'])
 @login_required
 @csrf.exempt
@@ -205,13 +196,11 @@ def pet_delete(id):
     flash('Pet deleted successfully!', 'info')
     return redirect(url_for('pets_list'))
 
-
 @app.route('/appointments')
 @login_required
 def appointments_list():
     appts = Appointment.query.filter_by(owner_id=current_user.id).all()
     return render_template('appointments.html', appointments=appts)
-
 
 @app.route('/appointments/new', methods=['GET', 'POST'])
 @login_required
@@ -238,7 +227,6 @@ def appointment_new():
     return render_template('appointment_form.html', form=form, title='Book Appointment',
                            form_action=url_for('appointment_new'))
 
-
 @app.route('/appointments/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def appointment_edit(id):
@@ -249,7 +237,6 @@ def appointment_edit(id):
     form = AppointmentForm(obj=appt)
     form.pet_id.choices = [(p.id, p.name) for p in current_user.pets]
 
-    # Pre-populate DateTimeField for editing
     if request.method == 'GET':
         form.scheduled_at.data = appt.scheduled_at
 
@@ -265,7 +252,6 @@ def appointment_edit(id):
     return render_template('appointment_form.html', form=form, title='Edit Appointment',
                            form_action=url_for('appointment_edit', id=id))
 
-
 @app.route('/appointments/<int:id>/delete', methods=['POST'])
 @login_required
 @csrf.exempt
@@ -278,16 +264,13 @@ def appointment_delete(id):
     flash('Appointment deleted successfully!', 'info')
     return redirect(url_for('appointments_list'))
 
-
 @app.route('/services')
 def services():
     return render_template('services.html', services=SERVICES)
 
-
 @app.route('/staff')
 def staff():
     return render_template('staff.html', staff=STAFF)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
