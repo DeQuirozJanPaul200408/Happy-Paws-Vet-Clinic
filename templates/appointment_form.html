@@ -5,18 +5,26 @@
 <form method="POST" action="{{ form_action }}">
     {{ form.hidden_tag() }}
 
-    <label for="pet_id">{{ form.pet_id.label.text }}</label>
-    {{ form.pet_id(class="form-control") }}
+    <div class="mb-3">
+        <label for="pet_id" class="form-label">{{ form.pet_id.label.text }}</label>
+        {{ form.pet_id(class="form-select") }}
+    </div>
 
-    <label for="service">{{ form.service.label.text }}</label>
-    {{ form.service(class="form-control") }}
+    <div class="mb-3">
+        <label for="service" class="form-label">{{ form.service.label.text }}</label>
+        {{ form.service(class="form-select") }}
+    </div>
 
-    <label for="scheduled_at">{{ form.scheduled_at.label.text }}</label>
-    {{ form.scheduled_at(class="form-control", type="datetime-local") }}
+    <div class="mb-3">
+        <label for="scheduled_at" class="form-label">{{ form.scheduled_at.label.text }}</label>
+        {{ form.scheduled_at(class="form-control", type="datetime-local") }}
+    </div>
 
-    <label for="notes">{{ form.notes.label.text }}</label>
-    {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
+    <div class="mb-3">
+        <label for="notes" class="form-label">{{ form.notes.label.text }}</label>
+        {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
+    </div>
 
-    {{ form.submit(class="btn") }}
+    {{ form.submit(class="btn btn-primary") }}
 </form>
 {% endblock %}
