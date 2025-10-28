@@ -29,15 +29,9 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(128), nullable=False)  # change from password_hash to password
     pets = db.relationship('Pet', backref='owner', lazy=True)
     appointments = db.relationship('Appointment', backref='owner', lazy=True)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
 
 class Pet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -118,8 +112,7 @@ def register():
         if User.query.filter_by(email=form.email.data).first():
             flash('Email already registered.', 'warning')
             return redirect(url_for('register'))
-        user = User(name=form.name.data, email=form.email.data)
-        user.set_password(form.password.data)
+        user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
         db.session.add(user)
         db.session.commit()
         flash('Registration successful! Please login.', 'success')
@@ -131,11 +124,12 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
+        if user and user.password == form.password.data:  # compare directly
             login_user(user)
             return redirect(url_for('dashboard'))
         flash('Invalid credentials.', 'danger')
     return render_template('login.html', form=form)
+
 
 @app.route('/logout')
 @login_required
