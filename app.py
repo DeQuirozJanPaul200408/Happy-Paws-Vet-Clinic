@@ -52,9 +52,36 @@ class Appointment(db.Model):
     status = db.Column(db.String(30), default='Scheduled')
 
 SERVICES = [
-    {'title': 'Wellness Checkup', 'desc': 'Routine physical exam and health check.'},
-    {'title': 'Vaccination', 'desc': 'Core vaccines and booster shots.'},
-    {'title': 'Surgery', 'desc': 'Minor surgical procedures.'},
+    {
+        'title': 'Wellness Checkup',
+        'desc': 'Routine physical exam and health check.',
+        'price': '₱500'
+    },
+    {
+        'title': 'Vaccination',
+        'desc': 'Core vaccines and booster shots.',
+        'price': '₱800'
+    },
+    {
+        'title': 'Surgery',
+        'desc': 'Minor surgical procedures.',
+        'price': '₱3,000'
+    },
+    {
+        'title': 'Deworming',
+        'desc': 'Eliminates intestinal worms and parasites.',
+        'price': '₱350'
+    },
+    {
+        'title': 'Dental Cleaning',
+        'desc': 'Removes tartar and improves oral health.',
+        'price': '₱1,200'
+    },
+    {
+        'title': 'Grooming',
+        'desc': 'Basic grooming, nail trimming, and bathing.',
+        'price': '₱600'
+    },
 ]
 
 STAFF = [
