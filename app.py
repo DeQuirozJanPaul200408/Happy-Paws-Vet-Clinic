@@ -29,9 +29,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
-    password = db.Column(db.String(128), nullable=False)  # change from password_hash to password
-    pets = db.relationship('Pet', backref='owner', lazy=True)
-    appointments = db.relationship('Appointment', backref='owner', lazy=True)
+    password = db.Column(db.String(128), nullable=False)
+    pets = db.relationship('Pet', backref='owner', lazy=True, cascade="all, delete-orphan")
+    appointments = db.relationship('Appointment', backref='owner', lazy=True, cascade="all, delete-orphan")
+
 
 class Pet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,17 +40,19 @@ class Pet(db.Model):
     breed = db.Column(db.String(80))
     age = db.Column(db.Integer)
     medical_history = db.Column(db.Text)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    appointments = db.relationship('Appointment', backref='pet', lazy=True, cascade="all, delete")
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    appointments = db.relationship('Appointment', backref='pet', lazy=True, cascade="all, delete-orphan")
+
 
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'), nullable=False)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id', ondelete='CASCADE'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     service = db.Column(db.String(120), nullable=False)
     scheduled_at = db.Column(db.DateTime, nullable=False)
     notes = db.Column(db.Text)
     status = db.Column(db.String(30), default='Scheduled')
+
 
 SERVICES = [
     {
