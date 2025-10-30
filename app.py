@@ -206,11 +206,20 @@ def appointment_new():
         return redirect(url_for('pet_new'))
 
     if form.validate_on_submit():
+        now = datetime.now()
+        scheduled_date = form.scheduled_at.data
+
+        # Prevent scheduling for today or past days
+        if scheduled_date.date() <= now.date():
+            flash('You cannot schedule an appointment for today or past dates. Please choose a future date.', 'danger')
+            return render_template('appointment_form.html', form=form, title='Book Appointment',
+                                   form_action=url_for('appointment_new'))
+
         appt = Appointment(
             pet_id=form.pet_id.data,
             owner_id=current_user.id,
             service=form.service.data,
-            scheduled_at=form.scheduled_at.data,
+            scheduled_at=scheduled_date,
             notes=form.notes.data
         )
         db.session.add(appt)
@@ -235,9 +244,18 @@ def appointment_edit(id):
         form.scheduled_at.data = appt.scheduled_at
 
     if form.validate_on_submit():
+        now = datetime.now()
+        scheduled_date = form.scheduled_at.data
+
+        # Prevent editing to today or past
+        if scheduled_date.date() <= now.date():
+            flash('You cannot set the appointment to today or a past date. Please choose a future date.', 'danger')
+            return render_template('appointment_form.html', form=form, title='Edit Appointment',
+                                   form_action=url_for('appointment_edit', id=id))
+
         appt.pet_id = form.pet_id.data
         appt.service = form.service.data
-        appt.scheduled_at = form.scheduled_at.data
+        appt.scheduled_at = scheduled_date
         appt.notes = form.notes.data
         db.session.commit()
         flash('Appointment updated successfully!', 'success')
