@@ -8,70 +8,89 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 
-# ---------------- Flask App Config ---------------- #
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'dev-secret-key')
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/vetclinic'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-csrf = CSRFProtect(app)
-csrf.init_app(app)
 
-# ---------------- Database Models ---------------- #
+csrf = CSRFProtect(app)
+
+# ------------------- MODELS -------------------
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    pets = db.relationship('Pet', backref='owner', lazy=True)
-    appointments = db.relationship('Appointment', backref='owner', lazy=True)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    password = db.Column(db.String(128), nullable=False)
+    pets = db.relationship('Pet', backref='owner', lazy=True, cascade="all, delete-orphan")
+    appointments = db.relationship('Appointment', backref='owner', lazy=True, cascade="all, delete-orphan")
 
 
 class Pet(db.Model):
-    __tablename__ = 'pets'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     breed = db.Column(db.String(80))
     age = db.Column(db.Integer)
     medical_history = db.Column(db.Text)
-    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    appointments = db.relationship('Appointment', backref='pet', lazy=True, cascade="all, delete")
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    appointments = db.relationship('Appointment', backref='pet', lazy=True, cascade="all, delete-orphan")
 
 
 class Appointment(db.Model):
-    __tablename__ = 'appointments'
     id = db.Column(db.Integer, primary_key=True)
-    pet_id = db.Column(db.Integer, db.ForeignKey('pets.id'), nullable=False)
-    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id', ondelete='CASCADE'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     service = db.Column(db.String(120), nullable=False)
     scheduled_at = db.Column(db.DateTime, nullable=False)
     notes = db.Column(db.Text)
     status = db.Column(db.String(30), default='Scheduled')
 
-# ---------------- Static Data ---------------- #
+
 SERVICES = [
-    {'title': 'Wellness Checkup', 'desc': 'Routine physical exam and health check.'},
-    {'title': 'Vaccination', 'desc': 'Core vaccines and booster shots.'},
-    {'title': 'Surgery', 'desc': 'Minor surgical procedures.'},
+    {
+        'title': 'Wellness Checkup',
+        'desc': 'Routine physical exam and health check.',
+        'price': '₱500'
+    },
+    {
+        'title': 'Vaccination',
+        'desc': 'Core vaccines and booster shots.',
+        'price': '₱800'
+    },
+    {
+        'title': 'Surgery',
+        'desc': 'Minor surgical procedures.',
+        'price': '₱3,000'
+    },
+    {
+        'title': 'Deworming',
+        'desc': 'Eliminates intestinal worms and parasites.',
+        'price': '₱350'
+    },
+    {
+        'title': 'Dental Cleaning',
+        'desc': 'Removes tartar and improves oral health.',
+        'price': '₱1,200'
+    },
+    {
+        'title': 'Grooming',
+        'desc': 'Basic grooming, nail trimming, and bathing.',
+        'price': '₱600'
+    },
 ]
 
 STAFF = [
     {'name': 'Jan Paul E. De Quiroz', 'role': 'Senior Veterinarian', 'bio': 'Expert in animal health and wellness with years of dedicated service.'},
-    {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'},
-    {'name': 'Zuriel Pecadero', 'role': 'Help Desk', 'bio': 'Helps you with your inquiries.'},
+    {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'}, 
+    {'name': 'Zuriel Pecadero', 'role': 'Help Desk.', 'bio': 'Helps you for your inquiries.'},
 ]
 
-# ---------------- Forms ---------------- #
+# ------------------- FORMS -------------------
 class RegistrationForm(FlaskForm):
     name = StringField('Full Name', validators=[DataRequired(), Length(2, 80)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -79,12 +98,10 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
-
 
 class PetForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -93,7 +110,6 @@ class PetForm(FlaskForm):
     medical_history = TextAreaField('Medical History', validators=[Optional()])
     submit = SubmitField('Save')
 
-
 class AppointmentForm(FlaskForm):
     pet_id = SelectField('Pet', coerce=int, validators=[DataRequired()])
     service = SelectField('Service', choices=[(s['title'], s['title']) for s in SERVICES])
@@ -101,19 +117,17 @@ class AppointmentForm(FlaskForm):
     notes = TextAreaField('Notes', validators=[Optional()])
     submit = SubmitField('Save')
 
-# ---------------- Login Manager ---------------- #
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ---------------- Before Request ---------------- #
 @app.before_request
 def create_tables_once():
     if not getattr(app, 'db_initialized', False):
         db.create_all()
         app.db_initialized = True
 
-# ---------------- Routes ---------------- #
+# ------------------- ROUTES -------------------
 @app.route('/')
 def index():
     return render_template('index.html', services=SERVICES, staff=STAFF)
@@ -122,11 +136,10 @@ def index():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data.strip()).first():
+        if User.query.filter_by(email=form.email.data).first():
             flash('Email already registered.', 'warning')
             return redirect(url_for('register'))
-        user = User(name=form.name.data.strip(), email=form.email.data.strip())
-        user.set_password(form.password.data.strip())
+        user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
         db.session.add(user)
         db.session.commit()
         flash('Registration successful! Please login.', 'success')
@@ -137,15 +150,13 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        email = form.email.data.strip()
-        password = form.password.data.strip()
-        user = User.query.filter_by(email=email).first()
-        if user and user.check_password(password):
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.password == form.password.data:  # compare directly
             login_user(user)
-            flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
-        flash('Invalid email or password.', 'danger')
+        flash('Invalid credentials.', 'danger')
     return render_template('login.html', form=form)
+
 
 @app.route('/logout')
 @login_required
@@ -159,7 +170,6 @@ def logout():
 def dashboard():
     return render_template('dashboard.html', pets=current_user.pets, appointments=current_user.appointments)
 
-# ---------------- Pets Routes ---------------- #
 @app.route('/pets')
 @login_required
 def pets_list():
@@ -207,7 +217,6 @@ def pet_delete(id):
     flash('Pet deleted successfully!', 'info')
     return redirect(url_for('pets_list'))
 
-# ---------------- Appointments Routes ---------------- #
 @app.route('/appointments')
 @login_required
 def appointments_list():
@@ -224,11 +233,19 @@ def appointment_new():
         return redirect(url_for('pet_new'))
 
     if form.validate_on_submit():
+        now = datetime.now()
+        scheduled_date = form.scheduled_at.data
+
+        if scheduled_date.date() <= now.date():
+            flash('You cannot schedule an appointment for today or past dates. Please choose a future date.', 'danger')
+            return render_template('appointment_form.html', form=form, title='Book Appointment',
+                                   form_action=url_for('appointment_new'))
+
         appt = Appointment(
             pet_id=form.pet_id.data,
             owner_id=current_user.id,
             service=form.service.data,
-            scheduled_at=form.scheduled_at.data,
+            scheduled_at=scheduled_date,
             notes=form.notes.data
         )
         db.session.add(appt)
@@ -253,9 +270,17 @@ def appointment_edit(id):
         form.scheduled_at.data = appt.scheduled_at
 
     if form.validate_on_submit():
+        now = datetime.now()
+        scheduled_date = form.scheduled_at.data
+
+        if scheduled_date.date() <= now.date():
+            flash('You cannot set the appointment to today or a past date. Please choose a future date.', 'danger')
+            return render_template('appointment_form.html', form=form, title='Edit Appointment',
+                                   form_action=url_for('appointment_edit', id=id))
+
         appt.pet_id = form.pet_id.data
         appt.service = form.service.data
-        appt.scheduled_at = form.scheduled_at.data
+        appt.scheduled_at = scheduled_date
         appt.notes = form.notes.data
         db.session.commit()
         flash('Appointment updated successfully!', 'success')
@@ -276,7 +301,6 @@ def appointment_delete(id):
     flash('Appointment deleted successfully!', 'info')
     return redirect(url_for('appointments_list'))
 
-# ---------------- Other Routes ---------------- #
 @app.route('/services')
 def services():
     return render_template('services.html', services=SERVICES)
@@ -285,16 +309,5 @@ def services():
 def staff():
     return render_template('staff.html', staff=STAFF)
 
-# ---------------- Optional: Re-hash Existing Passwords ---------------- #
-@app.route('/rehash-passwords')
-def rehash_passwords():
-    # Only run if needed to fix old plain-text passwords
-    for user in User.query.all():
-        if not user.password_hash.startswith('pbkdf2:'):
-            user.password_hash = generate_password_hash(user.password_hash)
-    db.session.commit()
-    return "All passwords rehashed successfully!"
-
-# ---------------- Run App ---------------- #
 if __name__ == '__main__':
     app.run(debug=True)

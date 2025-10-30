@@ -1,44 +1,67 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ title }}</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">{{ title }}</h2>
 
-<section>
-    <h3>Your Pets</h3>
-    {% if pets %}
-        <ul>
-        {% for pet in pets %}
-            <li>
-                <strong>{{ pet.name }}</strong> - {{ pet.breed or 'Unknown Breed' }} ({{ pet.age or '?' }} yrs)
-                <a href="{{ url_for('pet_edit', id=pet.id) }}" class="btn btn-sm btn-primary">✏️ Edit</a>
-                <form action="{{ url_for('pet_delete', id=pet.id) }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure you want to delete this pet?')">🗑️ Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>You have no pets yet. <a href="{{ url_for('pet_new') }}">Add one</a>.</p>
-    {% endif %}
-</section>
+    <!-- Quick Action Buttons -->
+    <div class="mb-4">
+        <a href="{{ url_for('pet_new') }}" class="btn btn-primary btn-lg me-3">
+            🐾 Add Pet Details
+        </a>
+        <a href="{{ url_for('appointment_new') }}" class="btn btn-success btn-lg">
+            📅 Book Appointment
+        </a>
+    </div>
 
-<section>
-    <h3>Your Appointments</h3>
-    {% if appointments %}
-        <ul>
-        {% for a in appointments %}
-            <li>
-                {{ a.service }} for {{ a.pet.name }} on {{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') }} ({{ a.status }})
-                <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary">✏️ Edit</a>
-                <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure you want to cancel this appointment?')">🗑️ Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No appointments yet. <a href="{{ url_for('appointment_new') }}">Book one</a>.</p>
-    {% endif %}
-</section>
+    <!-- Pets Section -->
+    <section class="mb-5">
+        <h3 class="mb-3">Your Pets</h3>
+        {% if pets %}
+            <ul class="list-group">
+                {% for pet in pets %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ pet.name }}</strong> - {{ pet.breed or 'Unknown Breed' }} ({{ pet.age or '?' }} yrs)
+                        </div>
+                        <div>
+                            <a href="{{ url_for('pet_edit', id=pet.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>
+                            <form action="{{ url_for('pet_delete', id=pet.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Are you sure you want to delete this pet?')">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have no pets yet.</p>
+        {% endif %}
+    </section>
+
+    <!-- Appointments Section -->
+    <section>
+        <h3 class="mb-3">Your Appointments</h3>
+        {% if appointments %}
+            <ul class="list-group">
+                {% for a in appointments %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            {{ a.service }} for <strong>{{ a.pet.name }}</strong><br>
+                            <small>{{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') }} ({{ a.status }})</small>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>
+                            <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Are you sure you want to cancel this appointment?')">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No appointments yet.</p>
+        {% endif %}
+    </section>
+</div>
 {% endblock %}
