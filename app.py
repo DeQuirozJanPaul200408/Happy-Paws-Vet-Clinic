@@ -11,9 +11,12 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'dev-secret-key')
 
-
+# ----------------- CHANGE TO MYSQL -----------------
+# Make sure you have created a database named 'vetclinic' in MySQL
+# Replace 'root', '', and 'localhost' if needed
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/vetclinic'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ---------------------------------------------------
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -236,6 +239,7 @@ def appointment_new():
         now = datetime.now()
         scheduled_date = form.scheduled_at.data
 
+        # Prevent scheduling for today or past days
         if scheduled_date.date() <= now.date():
             flash('You cannot schedule an appointment for today or past dates. Please choose a future date.', 'danger')
             return render_template('appointment_form.html', form=form, title='Book Appointment',
@@ -273,6 +277,7 @@ def appointment_edit(id):
         now = datetime.now()
         scheduled_date = form.scheduled_at.data
 
+        # Prevent editing to today or past
         if scheduled_date.date() <= now.date():
             flash('You cannot set the appointment to today or a past date. Please choose a future date.', 'danger')
             return render_template('appointment_form.html', form=form, title='Edit Appointment',
