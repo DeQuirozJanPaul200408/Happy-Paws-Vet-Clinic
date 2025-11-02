@@ -11,12 +11,8 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'dev-secret-key')
 
-# ----------------- CHANGE TO MYSQL -----------------
-# Make sure you have created a database named 'vetclinic' in MySQL
-# Replace 'root', '', and 'localhost' if needed
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/vetclinic'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# ---------------------------------------------------
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -90,8 +86,15 @@ SERVICES = [
 STAFF = [
     {'name': 'Jan Paul E. De Quiroz', 'role': 'Senior Veterinarian', 'bio': 'Expert in animal health and wellness with years of dedicated service.'},
     {'name': 'Danniel John Morales', 'role': 'Veterinarian', 'bio': 'Specializes in surgery and compassionate pet care.'}, 
-    {'name': 'Zuriel Pecadero', 'role': 'Help Desk.', 'bio': 'Helps you for your inquiries.'},
+    {'name': 'Zuriel Pecadero', 'role': 'Help Desk', 'bio': 'Helps you with your inquiries.'},
+    {'name': 'Kim Tomotorgo', 'role': 'Wellness Veterinarian', 'bio': 'Focused on Wellness Checkups and ensuring pets maintain optimal health.'},
+    {'name': 'Vanessa Ofrancia', 'role': 'Veterinary Nurse', 'bio': 'Specializes in Vaccination and preventive care to keep pets safe from diseases.'},
+    {'name': 'Irish Rocha', 'role': 'Veterinary Surgical Nurse', 'bio': 'Assists in Surgery and post-operative care with precision and compassion.'},
+    {'name': 'Ellemar Pundavela', 'role': 'Preventive Care Specialist', 'bio': 'Specializes in Deworming and preventive pet treatments.'},
+    {'name': 'Ruffaina Hamsain', 'role': 'Dental Care Specialist', 'bio': 'Expert in Dental Cleaning and oral care for pets.'},
+    {'name': 'Rose Ann Tolentino', 'role': 'Grooming Specialist', 'bio': 'Specializes in Grooming and maintaining pet hygiene.'}
 ]
+
 
 # ------------------- FORMS -------------------
 class RegistrationForm(FlaskForm):
