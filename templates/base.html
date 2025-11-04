@@ -5,10 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vet Clinic - {{ title if title else 'Home' }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            background-image: url('{{ url_for("static", filename="images/vet.png") }}');
+            background-size: 100% 100%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out;
+            color: #fff;
+        }
+
+        header, footer {
+            background: rgba(0, 0, 0, 0.6);
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin: 30px auto;
+            width: 90%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        nav a {
+            color: #00d9ff;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+        }
+
+        .flash-messages {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>🐾 Happy Paws Vet Clinic  🐾</h1>
+        <h1>🐾 Happy Paws Vet Clinic 🐾</h1>
         <nav>
             <a href="{{ url_for('index') }}">Home</a>
             <a href="{{ url_for('services') }}">Services</a>
@@ -39,5 +103,29 @@
     <footer>
         <p>© 2025 Happy Paws Vet Clinic. All rights reserved.</p>
     </footer>
+
+    <script>
+        const bgImages = [
+            "{{ url_for('static', filename='images/vet.png') }}",
+            "{{ url_for('static', filename='images/vet_2.png') }}",
+            "{{ url_for('static', filename='images/vet_3.png') }}",
+            "{{ url_for('static', filename='images/vet_4.png') }}",
+            "{{ url_for('static', filename='images/vet_5.png') }}",
+            "{{ url_for('static', filename='images/vet_6.png') }}",
+            "{{ url_for('static', filename='images/vet_7.png') }}",
+            "{{ url_for('static', filename='images/vet_8.png') }}",
+            "{{ url_for('static', filename='images/vet_9.png') }}"
+          ];
+
+        let currentIndex = 0;
+
+        function changeBackground() {
+            document.body.style.backgroundImage = `url('${bgImages[currentIndex]}')`;
+            currentIndex = (currentIndex + 1) % bgImages.length;
+        }
+
+        changeBackground();
+        setInterval(changeBackground, 5000);
+    </script>
 </body>
 </html>

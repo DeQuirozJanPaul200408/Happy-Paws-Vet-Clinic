@@ -11,7 +11,7 @@ body {
 a {
     color: #1abc9c;
     text-decoration: none;
-}
+}b  
 
 a:hover {
     color: #16a085;
@@ -114,9 +114,9 @@ label {
 }
 
 .card {
-    background: #2a2a2a;
-    padding: 20px;
     border-radius: 10px;
+    backdrop-filter: blur(20px);        /* soft blur effect behind it */
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ---------- TABLES ---------- */
@@ -169,10 +169,19 @@ th {
     color: #121212;
 }
 
+.outer-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1f1f1f; /* visible gray box */
+    border-radius: 15px;
+    width: 1300px;
+    height: 80vh;
+}
+
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 70vh;
-    max-width: 650px;
+    width: 100%;
 }

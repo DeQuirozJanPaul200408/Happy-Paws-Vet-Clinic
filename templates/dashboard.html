@@ -3,7 +3,6 @@
 <div class="container mt-4">
     <h2 class="mb-4">{{ title }}</h2>
 
-    <!-- Quick Action Buttons -->
     <div class="mb-4">
         <a href="{{ url_for('pet_new') }}" class="btn btn-primary btn-lg me-3">
             🐾 Add Pet Details
@@ -13,7 +12,6 @@
         </a>
     </div>
 
-    <!-- Pets Section -->
     <section class="mb-5">
         <h3 class="mb-3">Your Pets</h3>
         {% if pets %}
@@ -38,7 +36,6 @@
         {% endif %}
     </section>
 
-    <!-- Appointments Section -->
     <section>
         <h3 class="mb-3">Your Appointments</h3>
         {% if appointments %}
