@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Our Veterinary Services</h2>
+<div class="services-wrapper">
+    <h2>Our Veterinary Services</h2>
 
-<div class="cards">
-    {% for s in services %}
-    <div class="card">
-        <h3>{{ s.title }}</h3>
-        <p>{{ s.desc }}</p>
-        <p><strong>Price:</strong> {{ s.price }}</p>
+    <div class="cards">
+        {% for s in services %}
+        <div class="card">
+            <h3>{{ s.title }}</h3>
+            <p>{{ s.desc }}</p>
+            <p><strong>Price:</strong> {{ s.price }}</p>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}

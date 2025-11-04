@@ -1,30 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ title }}</h2>
+<div class="form-wrapper">
+    <div class="form-box">
+        <h2 class="mb-4 text-center">{{ title }}</h2>
 
-<form method="POST" action="{{ form_action }}">
-    {{ form.hidden_tag() }}
+        <form method="POST" action="{{ form_action }}">
+            {{ form.hidden_tag() }}
 
-    <div class="mb-3">
-        <label for="pet_id" class="form-label">{{ form.pet_id.label.text }}</label>
-        {{ form.pet_id(class="form-select") }}
+            <div class="mb-3">
+                <label for="pet_id" class="form-label">{{ form.pet_id.label.text }}</label>
+                {{ form.pet_id(class="form-select") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="service" class="form-label">{{ form.service.label.text }}</label>
+                {{ form.service(class="form-select") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="scheduled_at" class="form-label">{{ form.scheduled_at.label.text }}</label>
+                {{ form.scheduled_at(class="form-control", type="datetime-local") }}
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">{{ form.notes.label.text }}</label>
+                {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
+            </div>
+
+            {{ form.submit(class="btn btn-primary w-100") }}
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label for="service" class="form-label">{{ form.service.label.text }}</label>
-        {{ form.service(class="form-select") }}
-    </div>
-
-    <div class="mb-3">
-        <label for="scheduled_at" class="form-label">{{ form.scheduled_at.label.text }}</label>
-        {{ form.scheduled_at(class="form-control", type="datetime-local") }}
-    </div>
-
-    <div class="mb-3">
-        <label for="notes" class="form-label">{{ form.notes.label.text }}</label>
-        {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
-    </div>
-
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+</div>
 {% endblock %}

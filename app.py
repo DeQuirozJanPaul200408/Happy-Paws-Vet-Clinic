@@ -201,7 +201,40 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', pets=current_user.pets, appointments=current_user.appointments)
+    # fetch user's appointments and pets
+    appointments = sorted(current_user.appointments, key=lambda x: x.scheduled_at)  # sort by date
+    pets = current_user.pets
+
+    # Numeric prices (no currency symbols)
+    service_prices = {
+        'Wellness Checkup': 500.0,
+        'Vaccination': 800.0,
+        'Surgery': 3000.0,
+        'Deworming': 350.0,
+        'Dental Cleaning': 1200.0,
+        'Grooming': 600.0
+    }
+
+    # Attach a numeric price to each appointment object for use in the template
+    for a in appointments:
+        # default to 0.0 if service not found
+        a.price = float(service_prices.get(a.service, 0.0))
+
+    # Compute subtotal, VAT and total (rounded to 2 decimals)
+    subtotal = sum(a.price for a in appointments)
+    vat = round(subtotal * 0.12, 2)
+    total_payable = round(subtotal + vat, 2)
+    subtotal = round(subtotal, 2)
+
+    return render_template(
+        'dashboard.html',
+        pets=pets,
+        appointments=appointments,
+        subtotal=subtotal,
+        vat=vat,
+        total_payable=total_payable,
+        title='Dashboard'
+    )
 
 @app.route('/pets')
 @login_required
@@ -253,8 +286,35 @@ def pet_delete(id):
 @app.route('/appointments')
 @login_required
 def appointments_list():
-    appts = Appointment.query.filter_by(owner_id=current_user.id).all()
-    return render_template('appointments.html', appointments=appts)
+    appointments = Appointment.query.filter_by(owner_id=current_user.id).order_by(Appointment.scheduled_at).all()
+
+    # Define the service prices (base prices)
+    service_prices = {
+        'Wellness Checkup': 500.0,
+        'Vaccination': 800.0,
+        'Surgery': 3000.0,
+        'Deworming': 350.0,
+        'Dental Cleaning': 1200.0,
+        'Grooming': 600.0
+    }
+
+    # Attach prices to each appointment
+    for a in appointments:
+        a.price = float(service_prices.get(a.service, 0.0))
+
+    # Compute subtotal, VAT (12%), and total payable
+    subtotal = sum(a.price for a in appointments)
+    vat = round(subtotal * 0.12, 2)
+    total_payable = round(subtotal + vat, 2)
+    subtotal = round(subtotal, 2)
+
+    return render_template(
+        'appointments.html',
+        appointments=appointments,
+        subtotal=subtotal,
+        vat=vat,
+        total_payable=total_payable
+    )
 
 @app.route('/appointments/new', methods=['GET', 'POST'])
 @login_required

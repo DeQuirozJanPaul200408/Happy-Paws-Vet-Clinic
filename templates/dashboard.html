@@ -13,6 +13,7 @@
             </a>
         </div>
 
+        <!-- PET SECTION -->
         <section class="mb-5">
             <h3>Your Pets</h3>
             {% if pets %}
@@ -37,6 +38,7 @@
             {% endif %}
         </section>
 
+        <!-- APPOINTMENTS SECTION -->
         <section>
             <h3>Your Appointments</h3>
             {% if appointments %}
@@ -44,19 +46,27 @@
                     {% for a in appointments %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                {{ a.service }} for <strong>{{ a.pet.name }}</strong><br>
+                                <strong>{{ a.service }}</strong> for <strong>{{ a.pet.name }}</strong><br>
                                 <small>{{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') }} ({{ a.status }})</small>
                             </div>
-                            <div>
-                                <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>
+                            <div class="text-end">
+                                <p class="mb-0 text-success fw-bold">₱{{ '%.2f'|format(a.price) }}</p>
+                                <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1 mt-1">✏️ Edit</a>
                                 <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger"
+                                    <button type="submit" class="btn btn-sm btn-danger mt-1"
                                             onclick="return confirm('Are you sure you want to cancel this appointment?')">🗑️ Delete</button>
                                 </form>
                             </div>
                         </li>
                     {% endfor %}
                 </ul>
+
+                <!-- TOTAL PAYABLE -->
+                <div class="mt-4 p-3 border rounded bg-light text-end shadow-sm">
+                    <p class="mb-1 fw-semibold">Subtotal: ₱{{ '%.2f'|format(subtotal) }}</p>
+                    <p class="mb-1 fw-semibold">VAT (12%): ₱{{ '%.2f'|format(vat) }}</p>
+                    <h4 class="text-success fw-bold">💰 Total Payable: ₱{{ '%.2f'|format(total_payable) }}</h4>
+                </div>
             {% else %}
                 <p>No appointments yet.</p>
             {% endif %}

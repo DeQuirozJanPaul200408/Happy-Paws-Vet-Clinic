@@ -2,7 +2,7 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 90px 0 80px 0; /* Top padding for fixed header, bottom for fixed footer */
     background: #121212; /* dark gray/black */
     color: #e0e0e0;
     line-height: 1.6;
@@ -19,10 +19,19 @@ a:hover {
 
 /* ---------- HEADER ---------- */
 header {
-    background: #1f1f1f;
+    position: fixed;           /* Fixes header at top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;             /* Keeps header above content */
+    background: rgba(31, 31, 31, 0.85); /* Semi-transparent dark */
+    backdrop-filter: blur(10px);       /* Glass blur effect */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
     color: #1abc9c;
     padding: 1.5rem 0;
     text-align: center;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 header h1 {
@@ -52,11 +61,19 @@ main {
 
 /* ---------- FOOTER ---------- */
 footer {
-    text-align: center;
-    padding: 20px;
-    background: #1f1f1f;
+    position: fixed;          /* Fixed at bottom */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;            /* Above other content */
+    background: rgba(31, 31, 31, 0.85); /* Semi-transparent glass */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: #1abc9c;
-    margin-top: 50px;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
+    border-top: 1px solid rgba(255,255,255,0.1);
     font-weight: 500;
 }
 
@@ -200,8 +217,9 @@ th {
 .dashboard-wrapper {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 90vh;
+    align-items: flex-start; /* Start from top instead of vertically centered */
+    padding-top: 60px;       /* Space below fixed header */
+    min-height: 90vh;
     background: transparent;
 }
 
@@ -217,6 +235,7 @@ th {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
     color: #e0e0e0;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
 }
 
 .dashboard-container h2 {
@@ -367,8 +386,142 @@ h2 {
     line-height: 1.2;
 }
 
-/* Optional: tidy up overall spacing */
 .list-group-item strong {
     color: #1abc9c;
     font-weight: 700;
+}
+
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 90vh;
+    background: transparent;
+}
+
+.form-box {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+}
+
+.form-box h2 {
+    color: #1abc9c;
+    font-weight: 700;
+}
+
+.form-box .form-label {
+    font-weight: 600;
+    color: #e0e0e0;
+}
+
+.form-box .form-control,
+.form-box .form-select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background: #2a2a2a;
+    color: #e0e0e0;
+}
+
+.form-box .form-control:focus,
+.form-box .form-select:focus {
+    border-color: #1abc9c;
+    outline: none;
+}
+
+.form-box .btn {
+    margin-top: 10px;
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+/* ---------- FORM PAGE SPACING BELOW FIXED HEADER ---------- */
+.form-wrapper {
+    padding-top: 120px;   /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ---------- FORM CONTROL STYLING ---------- */
+.form-control {
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background: #2a2a2a;
+    color: #e0e0e0;
+}
+
+.form-control:focus {
+    border-color: #1abc9c;
+    outline: none;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn {
+    background: #1abc9c;
+    color: #121212;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background: #16a085;
+}
+
+/* ---------- SERVICES PAGE SPACING BELOW FIXED HEADER ---------- */
+.services-wrapper {
+    padding-top: 50px; /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ---------- STAFF PAGE SPACING BELOW FIXED HEADER ---------- */
+.staff-wrapper {
+    padding-top: 50px;  /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ---------- HOME PAGE SPACING BELOW FIXED HEADER ---------- */
+.home-wrapper {
+    padding-top: 50px;  /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ---------- FORM PAGE SPACING BELOW FIXED HEADER ---------- */
+.form-wrapper {
+    padding-top: 50px;   /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ---------- FORM PAGE SPACING BELOW FIXED HEADER ---------- */
+.form-wrapper {
+    padding-top: 50px;   /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ---------- PAGE WRAPPER FOR ALL PAGES BELOW FIXED HEADER ---------- */
+.page-wrapper {
+    padding-top: 120px;   /* space below fixed header */
+    padding-bottom: 80px; /* space above fixed footer */
+    max-width: 600px;
+    margin: 0 auto;
 }

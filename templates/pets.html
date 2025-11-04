@@ -1,39 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>My Pets</h2>
+<div class="dashboard-container">
+    <h2>My Pets</h2>
 
-<a class="btn btn-success mb-3" href="{{ url_for('pet_new') }}">➕ Add New Pet</a>
+    <a class="btn btn-success mb-3" href="{{ url_for('pet_new') }}">➕ Add New Pet</a>
 
-{% if pets %}
-<table class="table table-striped table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>Name</th>
-            <th>Breed</th>
-            <th>Age</th>
-            <th>Medical History</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for pet in pets %}
-        <tr>
-            <td>{{ pet.name }}</td>
-            <td>{{ pet.breed or '-' }}</td>
-            <td>{{ pet.age or '-' }}</td>
-            <td>{{ pet.medical_history or 'None' }}</td>
-            <td>
-                <a href="{{ url_for('pet_edit', id=pet.id) }}" class="btn btn-sm btn-primary mb-1">✏️ Edit</a>
-                <form action="{{ url_for('pet_delete', id=pet.id) }}" method="POST" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-danger mb-1"
-                        onclick="return confirm('Are you sure you want to delete this pet?')">🗑️ Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No pets found. <a href="{{ url_for('pet_new') }}">Add your first pet</a>.</p>
-{% endif %}
+    {% if pets %}
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Breed</th>
+                <th>Age</th>
+                <th>Medical History</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pet in pets %}
+            <tr>
+                <td>{{ pet.name }}</td>
+                <td>{{ pet.breed or '-' }}</td>
+                <td>{{ pet.age or '-' }}</td>
+                <td>{{ pet.medical_history or 'None' }}</td>
+                <td>
+                    <a href="{{ url_for('pet_edit', id=pet.id) }}" class="btn btn-sm btn-primary mb-1">✏️ Edit</a>
+                    <form action="{{ url_for('pet_delete', id=pet.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger mb-1"
+                            onclick="return confirm('Are you sure you want to delete this pet?')">🗑️ Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No pets found. <a href="{{ url_for('pet_new') }}">Add your first pet</a>.</p>
+    {% endif %}
+</div>
 {% endblock %}
