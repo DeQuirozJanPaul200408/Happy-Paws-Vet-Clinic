@@ -1,36 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>All Pets</h2>
-<div class="table-responsive">
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Breed</th>
-                <th>Age</th>
-                <th>Owner</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pet in pets %}
-            <tr>
-                <td>{{ pet.id }}</td>
-                <td>{{ pet.name }}</td>
-                <td>{{ pet.breed or 'N/A' }}</td>
-                <td>{{ pet.age or 'N/A' }}</td>
-                <td>{{ pet.owner.name }}</td>
-                <td>
-                    <form method="POST" action="{{ url_for('admin_pet_delete', id=pet.id) }}" style="display:inline;">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this pet?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container my-5">
+    <h2 class="text-center text-primary mb-4">All Pets</h2>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Breed</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Owner</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pet in pets %}
+                <tr>
+                    <td>{{ pet.id }}</td>
+                    <td>{{ pet.name }}</td>
+                    <td>{{ pet.breed or 'N/A' }}</td>
+                    <td>{{ pet.age or 'N/A' }}</td>
+                    <td>{{ pet.owner.name }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin_pet_delete', id=pet.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                onclick="return confirm('Are you sure you want to delete this pet?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">
+            Back to Admin Dashboard
+        </a>
+    </div>
 </div>
-<a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
 {% endblock %}

@@ -1,18 +1,68 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
+<div class="container my-5">
     <h2 class="text-center mb-4 text-info fw-bold">Welcome to Happy Paws Vet Clinic</h2>
-    <h3 class="text-center mb-4">Admin Dashboard</h3>
-    <div class="text-center">
-        <p>Total Users: {{ total_users }}</p>
-        <p>Total Pets: {{ total_pets }}</p>
-        <p>Total Appointments: {{ total_appointments }}</p>
+    <h3 class="text-center mb-5 fw-semibold">Admin Dashboard</h3>
+
+    <div class="row g-4 justify-content-center mb-4">
+        <div class="col-md-3">
+            <div class="dashboard-card p-4 text-center">
+                <h5 class="fw-bold text-light mb-2">Total Users</h5>
+                <p class="display-6 text-warning">{{ total_users }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card p-4 text-center">
+                <h5 class="fw-bold text-light mb-2">Total Pets</h5>
+                <p class="display-6 text-warning">{{ total_pets }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card p-4 text-center">
+                <h5 class="fw-bold text-light mb-2">Total Appointments</h5>
+                <p class="display-6 text-warning">{{ total_appointments }}</p>
+            </div>
+        </div>
     </div>
+
     <div class="text-center">
-        <a href="{{ url_for('admin_users') }}">Manage Users</a> |
-        <a href="{{ url_for('admin_pets') }}">View All Pets</a> |
-        <a href="{{ url_for('admin_appointments') }}">View All Appointments</a>
+        <a class="dashboard-btn" href="{{ url_for('admin_users') }}">Manage Users</a>
+        <a class="dashboard-btn" href="{{ url_for('admin_pets') }}">View All Pets</a>
+        <a class="dashboard-btn" href="{{ url_for('admin_appointments') }}">View All Appointments</a>
     </div>
 </div>
+
+<style>
+/* Dashboard Cards */
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.dashboard-btn {
+    display: inline-block;
+    margin: 0.5rem 1rem;
+    padding: 0.5rem 1.5rem;
+    background: rgba(0, 123, 255, 0.85);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.dashboard-btn:hover {
+    background: #00cfff;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+</style>
 {% endblock %}

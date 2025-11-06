@@ -1,34 +1,75 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="form-wrapper">
-    <div class="form-box">
-        <h2 class="mb-4 text-center">{{ title }}</h2>
+<div class="form-wrapper d-flex justify-content-center align-items-center py-5">
+    <div class="form-box p-4" 
+         style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); width: 100%; max-width: 500px;">
+        
+        <h2 class="mb-4 text-center text-info fw-bold">{{ title }}</h2>
 
         <form method="POST" action="{{ form_action }}">
             {{ form.hidden_tag() }}
 
             <div class="mb-3">
-                <label for="pet_id" class="form-label">{{ form.pet_id.label.text }}</label>
+                <label for="pet_id" class="form-label text-white fw-semibold">{{ form.pet_id.label.text }}</label>
                 {{ form.pet_id(class="form-select") }}
             </div>
 
             <div class="mb-3">
-                <label for="service" class="form-label">{{ form.service.label.text }}</label>
+                <label for="service" class="form-label text-white fw-semibold">{{ form.service.label.text }}</label>
                 {{ form.service(class="form-select") }}
             </div>
 
             <div class="mb-3">
-                <label for="scheduled_at" class="form-label">{{ form.scheduled_at.label.text }}</label>
+                <label for="scheduled_at" class="form-label text-white fw-semibold">{{ form.scheduled_at.label.text }}</label>
                 {{ form.scheduled_at(class="form-control", type="datetime-local") }}
             </div>
 
             <div class="mb-3">
-                <label for="notes" class="form-label">{{ form.notes.label.text }}</label>
+                <label for="notes" class="form-label text-white fw-semibold">{{ form.notes.label.text }}</label>
                 {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
             </div>
 
-            {{ form.submit(class="btn btn-primary w-100") }}
+            {{ form.submit(class="btn btn-info w-100 fw-bold") }}
         </form>
     </div>
 </div>
+
+<style>
+.form-box input:focus,
+.form-box select:focus,
+.form-box textarea:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+    border: none;
+}
+
+.btn-info {
+    background: #00cfff;
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+/* ---------- MAKE SELECT OPTIONS VISIBLE ---------- */
+.form-box .form-select {
+    background: rgba(255, 255, 255, 0.1);
+    color: #000 !important;       /* ensure visible text */
+    border-radius: 10px;
+    border: none;
+}
+
+.form-box .form-select option {
+    color: #000;                  /* option text color */
+    background-color: #fff;       /* option background */
+}
+
+.form-wrapper {
+    min-height: 80vh;
+}
+</style>
 {% endblock %}

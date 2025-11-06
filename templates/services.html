@@ -1,16 +1,64 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="services-wrapper">
-    <h2>Our Veterinary Services</h2>
 
-    <div class="cards">
-        {% for s in services %}
-        <div class="card">
-            <h3>{{ s.title }}</h3>
-            <p>{{ s.desc }}</p>
-            <p><strong>Price:</strong> {{ s.price }}</p>
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-5 text-info fw-bold">Our Veterinary Services</h2>
+
+    <div class="services-wrapper" style="max-height: 600px; overflow-y: auto; padding-right: 10px;">
+        <div class="row g-4">
+            {% for service in services %}
+            <div class="col-md-4">
+                <div class="service-card p-4 h-100 text-center">
+                    <h5 class="fw-bold mb-3">{{ service.title }}</h5>
+                    <p class="mb-3">{{ service.desc }}</p>
+                    <p class="fw-semibold text-warning">Price: {{ service.price }}</p>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
+
+<style>
+/* Scrollbar Styling */
+.services-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.services-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.services-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+/* Service Card */
+.service-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.service-card h5 {
+    color: #fff;
+}
+
+.service-card p {
+    color: #f0f0f0;
+}
+
+.service-card .text-warning {
+    color: #ffd700;
+}
+</style>
 {% endblock %}

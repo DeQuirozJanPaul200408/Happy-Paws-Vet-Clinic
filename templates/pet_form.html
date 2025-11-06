@@ -1,34 +1,65 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="dashboard-wrapper">
-    <div class="dashboard-container">
-        <h2 class="mb-4">{{ title }}</h2>
+<div class="form-wrapper d-flex justify-content-center align-items-center py-5">
+    <div class="form-box p-4" 
+         style="background: rgba(254, 253, 253, 0.15); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); width: 100%; max-width: 500px;">
+        
+        <h2 class="mb-4 text-center text-info fw-bold">{{ title }}</h2>
 
         <form method="POST" action="{{ form_action }}">
             {{ form.hidden_tag() }}
 
             <div class="mb-3">
-                <label class="form-label">{{ form.name.label }}</label>
-                {{ form.name(class="form-control", placeholder="Enter pet name") }}
+                <label class="form-label text-white fw-semibold">{{ form.name.label }}</label>
+                {{ form.name(class="form-control", placeholder="Enter pet name",
+                    style="background: rgba(255,255,255,0.1); color: #fff; border-radius: 10px; border:none;") }}
             </div>
 
             <div class="mb-3">
-                <label class="form-label">{{ form.breed.label }}</label>
-                {{ form.breed(class="form-control", placeholder="Enter breed") }}
+                <label class="form-label text-white fw-semibold">{{ form.breed.label }}</label>
+                {{ form.breed(class="form-control", placeholder="Enter breed",
+                    style="background: rgba(255,255,255,0.1); color: #fff; border-radius: 10px; border:none;") }}
             </div>
 
             <div class="mb-3">
-                <label class="form-label">{{ form.age.label }}</label>
-                {{ form.age(class="form-control", placeholder="Enter age in years") }}
+                <label class="form-label text-white fw-semibold">{{ form.age.label }}</label>
+                {{ form.age(class="form-control", placeholder="Enter age in years",
+                    style="background: rgba(255,255,255,0.1); color: #fff; border-radius: 10px; border:none;") }}
             </div>
 
             <div class="mb-3">
-                <label class="form-label">{{ form.medical_history.label }}</label>
-                {{ form.medical_history(class="form-control", rows="3", placeholder="Enter medical history (optional)") }}
+                <label class="form-label text-white fw-semibold">{{ form.medical_history.label }}</label>
+                {{ form.medical_history(class="form-control", rows="3", placeholder="Enter medical history (optional)",
+                    style="background: rgba(255,255,255,0.1); color: #fff; border-radius: 10px; border:none;") }}
             </div>
 
-            {{ form.submit(class="btn btn-primary") }}
+            {{ form.submit(class="btn btn-info w-100 fw-bold") }}
         </form>
     </div>
 </div>
+
+<style>
+.form-box input:focus,
+.form-box textarea:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgb(255, 255, 255);
+    border: none;
+}
+
+.btn-info {
+    background: #00cfff;
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgb(255, 255, 255);
+}
+
+.form-wrapper {
+    min-height: 80vh;
+}
+</style>
 {% endblock %}

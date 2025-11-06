@@ -1,59 +1,114 @@
-
 {% extends "base.html" %}
+
 {% block content %}
-<div class="dashboard-wrapper">
-    <div class="dashboard-container">
-        <h2 class="mb-4">My Appointments</h2>
-
-        <a href="{{ url_for('appointment_new') }}" class="btn btn-success mb-3">➕ Book Appointment</a>
-
-        {% if appointments %}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover mt-3">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Pet</th>
-                        <th>Service</th>
-                        <th>Date & Time</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                        <th>Price (₱)</th>
-                        <th>Total Payable (₱)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in appointments %}
-                    <tr>
-                        <td>{{ a.pet.name }}</td>
-                        <td>{{ a.service }}</td>
-                        <td>{{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>{{ a.status }}</td>
-                        <td>{{ a.notes or '-' }}</td>
-                        <td>₱{{ '%.2f'|format(a.price) }}</td>
-                        <td>₱{{ '%.2f'|format(a.total_payable) }}</td>
-                        <td>
-                            <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>
-                            <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Are you sure you want to cancel this appointment?')">🗑️ Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Total Payable Summary -->
-            <div class="text-end mt-4">
-                <h5>Subtotal: ₱{{ '%.2f'|format(subtotal) }}</h5>
-                <h6>VAT (12%): ₱{{ '%.2f'|format(vat) }}</h6>
-                <h4 class="fw-bold text-success">💰 Total Payable: ₱{{ '%.2f'|format(total_payable) }}</h4>
-            </div>
-
-        {% else %}
-            <p>No appointments yet.</p>
-        {% endif %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-info">All Appointments</h2>
     </div>
+
+    {% if appointments %}
+    <div class="table-responsive shadow rounded p-3 bg-light">
+        <table class="table table-hover align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Pet</th>
+                    <th>Owner</th>
+                    <th>Service</th>
+                    <th>Scheduled At</th>
+                    <th>Status</th>
+                    <th>Total Payable</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.id }}</td>
+                    <td>{{ appointment.pet.name }}</td>
+                    <td>{{ appointment.owner.name }}</td>
+                    <td>{{ appointment.service }}</td>
+                    <td>{{ appointment.scheduled_at }}</td>
+                    <td>{{ appointment.status }}</td>
+                    <td>₱{{ "%.2f"|format(appointment.total_payable) }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin_appointment_delete', id=appointment.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger mb-1"
+                                onclick="return confirm('Are you sure you want to delete this appointment?')">
+                                🗑️ Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Back to Dashboard Button -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-info btn-lg">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    {% else %}
+    <div class="text-center mt-5">
+        <p class="fs-5">No appointments found.</p>
+
+        <!-- Back to Dashboard Button -->
+        <div class="mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-info btn-lg">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<style>
+/* Table Hover Effect */
+.table-hover tbody tr:hover {
+    background-color: #e0f7fa;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Button Styles */
+.btn-info {
+    background: linear-gradient(45deg, #17a2b8, #0dcaf0);
+    color: #fff;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-info:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    color: #fff;
+}
+
+/* Scrollbar Styling */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+</style>
 {% endblock %}
