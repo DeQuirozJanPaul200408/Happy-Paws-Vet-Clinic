@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, redirect, url_for, flash, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm, CSRFProtect
@@ -515,5 +516,27 @@ def admin_appointments():
 
     return render_template('admin_appointments.html', appointments=appointments)
 
+@app.route('/admin/appointments/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+@csrf.exempt
+def admin_appointment_delete(id):
+    appointment = Appointment.query.get_or_404(id)
+    db.session.delete(appointment)
+    db.session.commit()
+    flash('Appointment deleted successfully.', 'info')
+    return redirect(url_for('admin_appointments'))
+
+@app.route('/admin/pets/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+@csrf.exempt
+def admin_pet_delete(id):
+    pet = Pet.query.get_or_404(id)
+    db.session.delete(pet)
+    db.session.commit()
+    flash('Pet deleted successfully.', 'info')
+    return redirect(url_for('admin_pets'))
+
 if __name__ == '__main__':
-    app.run(debug=True)
+     app.run(debug=True, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))

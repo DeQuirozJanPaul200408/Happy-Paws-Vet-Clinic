@@ -1,0 +1,3 @@
+- [ ] Update templates/admin_appointments.html to add "Actions" column with delete button for each appointment
+- [ ] Add new route in app.py for admin appointment delete
+- [ ] Test the delete functionality by running the app and attempting to delete an appointment as admin

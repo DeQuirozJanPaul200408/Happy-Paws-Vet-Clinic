@@ -1,28 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{ title }}</h2>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.name.label }}
-        {{ form.name(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.email.label }}
-        {{ form.email(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.password.label }}
-        {{ form.password(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.password2.label }}
-        {{ form.password2(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.submit(class="btn btn-info") }}
-    </div>
-</form>
-<a href="{{ url_for('admin_users') }}">Back to Users</a>
+<h2>All Pets</h2>
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Breed</th>
+                <th>Age</th>
+                <th>Owner</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pet in pets %}
+            <tr>
+                <td>{{ pet.id }}</td>
+                <td>{{ pet.name }}</td>
+                <td>{{ pet.breed or 'N/A' }}</td>
+                <td>{{ pet.age or 'N/A' }}</td>
+                <td>{{ pet.owner.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
 {% endblock %}

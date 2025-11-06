@@ -1,29 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="home-wrapper">
-    <h2>Welcome to Happy Paws Vet Clinic!</h2>
-    <p>We care for your pets like family. Book an appointment today!</p>
+<div class="container">
+    <h2 class="text-center mb-4 text-info fw-bold">Welcome to Happy Paws Vet Clinic</h2>
 
-    <section>
-        <h3>Our Services</h3>
-        <div class="cards">
-            {% for s in services %}
-            <div class="card">
-                <h4>{{ s.title }}</h4>
-                <p>{{ s.desc }}</p>
+    <section class="services-section">
+        <h3 class="text-center mb-3">Our Services</h3>
+        <div class="row">
+            {% for service in services %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ service.title }}</h5>
+                        <p class="card-text">{{ service.desc }}</p>
+                        <p class="card-text"><strong>Price: {{ service.price }}</strong></p>
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
     </section>
 
-    <section>
-        <h3>Meet Our Staff</h3>
-        <div class="cards">
-            {% for person in staff %}
-            <div class="card">
-                <h4>{{ person.name }}</h4>
-                <p><strong>{{ person.role }}</strong></p>
-                <p>{{ person.bio }}</p>
+    <section class="staff-section mt-5">
+        <h3 class="text-center mb-3">Our Staff</h3>
+        <div class="row">
+            {% for member in staff %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ member.name }}</h5>
+                        <p class="card-text"><em>{{ member.role }}</em></p>
+                        <p class="card-text">{{ member.bio }}</p>
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
