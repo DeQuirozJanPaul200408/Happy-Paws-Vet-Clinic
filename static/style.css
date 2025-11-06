@@ -1,6 +1,7 @@
 
 /* ---------- BASE ---------- */
 body {
+    padding-bottom: 120px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 90px 0 80px 0; /* Top padding for fixed header, bottom for fixed footer */
@@ -235,8 +236,9 @@ th {
     display: flex;
     justify-content: center;
     align-items: flex-start; /* Start from top instead of vertically centered */
-    padding-top: 60px;       /* Space below fixed header */
-    min-height: 90vh;
+    padding-top: 100px;      /* Space below fixed header */
+    padding-bottom: 150px;   /* Space above fixed footer */
+    min-height: 100vh;
     background: transparent;
 }
 
