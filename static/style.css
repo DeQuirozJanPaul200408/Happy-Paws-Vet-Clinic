@@ -519,3 +519,111 @@ h2 {
     max-width: 600px;
     margin: 0 auto;
 }
+
+/* ---------- SERVICES PAGE CENTERED LAYOUT ---------- */
+.services-wrapper {
+    display: flex;
+    justify-content: center;     /* horizontally center */
+    align-items: center;         /* vertically center */
+    flex-direction: column;
+    min-height: 90vh;            /* full visible height */
+    padding-top: 120px;          /* space below fixed header */
+    padding-bottom: 100px;       /* space above footer */
+}
+
+.cards {
+    display: flex;
+    flex-direction: column;      /* stack cards vertically */
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+    max-width: 500px;            /* keep it narrow and centered */
+}
+
+/* Make the cards look even cleaner and centered */
+.card {
+    background: rgba(104, 93, 93, 0.75);
+    color: #f8f9fa;
+    width: 90%;
+    border-radius: 20px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(13, 202, 240, 0.5);
+}
+
+/* ---------- STAFF PAGE CENTERED LAYOUT ---------- */
+.staff-wrapper {
+    display: flex;
+    justify-content: center;     /* horizontally center */
+    align-items: center;         /* vertically center */
+    flex-direction: column;
+    min-height: 90vh;            /* occupy full visible height */
+    padding-top: 120px;          /* space below fixed header */
+    padding-bottom: 100px;       /* space above footer */
+}
+
+/* Centered and responsive staff cards */
+.staff-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;     /* center cards horizontally */
+    align-items: flex-start;
+    gap: 30px;                   /* spacing between cards */
+    width: 100%;
+    max-width: 1200px;           /* controls total layout width */
+}
+
+/* Each staff member card */
+.staff-card {
+    background: rgba(0, 0, 0, 0.75);
+    color: #f8f9fa;
+    width: 260px;                /* uniform card size */
+    border-radius: 20px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.staff-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(13, 202, 240, 0.5);
+}
+
+.staff-card h3 {
+    color: #0dcaf0;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.staff-card strong {
+    color: #ffc107;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.staff-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .staff-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .staff-card {
+        width: 90%;
+    }
+}
