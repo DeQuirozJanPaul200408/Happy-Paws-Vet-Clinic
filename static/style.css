@@ -499,7 +499,7 @@ h2 {
 /* ---------- HOME PAGE SPACING BELOW FIXED HEADER ---------- */
 .home-wrapper {
     padding-top: 100px;  /* space below fixed header */
-    padding-bottom: 150px; /* space above fixed footer */
+    padding-bottom: 200px; /* space above fixed footer */
     max-width: 1600px;
     margin: 0 auto;
 }
