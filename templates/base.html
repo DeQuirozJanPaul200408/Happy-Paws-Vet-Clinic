@@ -3,88 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vet Clinic - {{ title if title else 'Home' }}</title>
+    <title>Happy Paws Vet Clinic - {{ title if title else 'Home' }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow-x: hidden;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 100vh;
-            background-image: url('{{ url_for("static", filename="images/vet.png") }}');
-            background-size: 100% 100%;
-            background-position: center center;
-            background-repeat: no-repeat;
-            transition: background-image 1s ease-in-out;
-            color: #fff;
-        }
-
-        header, footer {
-            background: rgba(0, 0, 0, 0.6);
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        main {
-            flex: 1;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            margin: 30px auto;
-            width: 90%;
-            max-width: 1200px;
-            box-sizing: border-box;
-        }
-
-        nav a {
-            color: #00d9ff;
-            text-decoration: none;
-            margin: 0 10px;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            color: #ffffff;
-        }
-
-        .flash-messages {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin: 5px;
-        }
-    </style>
 </head>
 <body>
     <header>
-        <h1>🐾 Happy Paws Vet Clinic 🐾</h1>
-        <nav>
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('services') }}">Services</a>
-            <a href="{{ url_for('staff') }}">Staff</a>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Register</a>
-            {% endif %}
-        </nav>
+        <div class="header-content">
+            <h1>🐾 Happy Paws Vet Clinic 🐾</h1>
+            <nav>
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('services') }}">Services</a>
+                <a href="{{ url_for('staff') }}">Staff</a>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('register') }}">Register</a>
+                {% endif %}
+            </nav>
+        </div>
     </header>
 
     <main>
@@ -92,7 +34,7 @@
           {% if messages %}
             <div class="flash-messages">
               {% for category, message in messages %}
-                <div class="alert {{ category }}">{{ message }}</div>
+                <div class="alert alert-{{ category }}">{{ message }}</div>
               {% endfor %}
             </div>
           {% endif %}
@@ -116,7 +58,7 @@
             "{{ url_for('static', filename='images/vet_8.png') }}",
             "{{ url_for('static', filename='images/vet_4.png') }}",
             "{{ url_for('static', filename='images/vet_10.png') }}"
-          ];
+        ];
 
         let currentIndex = 0;
 

@@ -20,12 +20,22 @@ login_manager.login_view = 'login'
 
 csrf = CSRFProtect(app)
 
+def admin_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ------------------- MODELS -------------------
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(20), default='user')  # 'user' or 'admin'
     pets = db.relationship('Pet', backref='owner', lazy=True, cascade="all, delete-orphan")
     appointments = db.relationship('Appointment', backref='owner', lazy=True, cascade="all, delete-orphan")
 
@@ -158,6 +168,11 @@ def load_user(user_id):
 def create_tables_once():
     if not getattr(app, 'db_initialized', False):
         db.create_all()
+        # Create default admin user if not exists
+        if not User.query.filter_by(email='administrator@gmail.com').first():
+            admin_user = User(name='Admin', email='administrator@gmail.com', password='admin123', role='admin')
+            db.session.add(admin_user)
+            db.session.commit()
         app.db_initialized = True
 
 # ------------------- ROUTES -------------------
@@ -186,7 +201,10 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.password == form.password.data:  # compare directly
             login_user(user)
-            return redirect(url_for('dashboard'))
+            if user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('dashboard'))
         flash('Invalid credentials.', 'danger')
     return render_template('login.html', form=form)
 
@@ -298,15 +316,15 @@ def appointments_list():
         'Grooming': 600.0
     }
 
-    # Attach prices to each appointment
+    # Attach prices and total payable to each appointment
     for a in appointments:
         a.price = float(service_prices.get(a.service, 0.0))
+        a.total_payable = round(a.price * 1.12, 2)
 
     # Compute subtotal, VAT (12%), and total payable
     subtotal = sum(a.price for a in appointments)
     vat = round(subtotal * 0.12, 2)
     total_payable = round(subtotal + vat, 2)
-    subtotal = round(subtotal, 2)
 
     return render_template(
         'appointments.html',
@@ -403,6 +421,99 @@ def services():
 @app.route('/staff')
 def staff():
     return render_template('staff.html', staff=STAFF)
+
+# ------------------- ADMIN ROUTES -------------------
+@app.route('/admin/dashboard')
+@login_required
+@admin_required
+def admin_dashboard():
+    total_users = User.query.count()
+    total_pets = Pet.query.count()
+    total_appointments = Appointment.query.count()
+
+    # Calculate total payable for all scheduled appointments
+    service_prices = {
+        'Wellness Checkup': 500.0,
+        'Vaccination': 800.0,
+        'Surgery': 3000.0,
+        'Deworming': 350.0,
+        'Dental Cleaning': 1200.0,
+        'Grooming': 600.0
+    }
+
+    appointments = Appointment.query.all()
+    subtotal = sum(float(service_prices.get(a.service, 0.0)) for a in appointments)
+    vat = round(subtotal * 0.12, 2)
+    total_payable = round(subtotal + vat, 2)
+
+    return render_template('admin_dashboard.html', total_users=total_users, total_pets=total_pets, total_appointments=total_appointments, total_payable=total_payable)
+
+@app.route('/admin/users')
+@login_required
+@admin_required
+def admin_users():
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/users/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_user_edit(id):
+    user = User.query.get_or_404(id)
+    form = RegistrationForm(obj=user)
+    if form.validate_on_submit():
+        user.name = form.name.data
+        user.email = form.email.data
+        user.password = form.password.data  # plain text
+        db.session.commit()
+        flash('User updated successfully.', 'success')
+        return redirect(url_for('admin_users'))
+    return render_template('admin_user_form.html', form=form, title='Edit User', form_action=url_for('admin_user_edit', id=id))
+
+@app.route('/admin/users/<int:id>/delete', methods=['POST'])
+@login_required
+@admin_required
+@csrf.exempt
+def admin_user_delete(id):
+    user = User.query.get_or_404(id)
+    if user.id == current_user.id:
+        flash('Cannot delete yourself.', 'danger')
+        return redirect(url_for('admin_users'))
+    db.session.delete(user)
+    db.session.commit()
+    flash('User deleted successfully.', 'info')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/pets')
+@login_required
+@admin_required
+def admin_pets():
+    pets = Pet.query.all()
+    return render_template('admin_pets.html', pets=pets)
+
+@app.route('/admin/appointments')
+@login_required
+@admin_required
+def admin_appointments():
+    appointments = Appointment.query.order_by(Appointment.scheduled_at).all()
+
+    # Define the service prices (base prices)
+    service_prices = {
+        'Wellness Checkup': 500.0,
+        'Vaccination': 800.0,
+        'Surgery': 3000.0,
+        'Deworming': 350.0,
+        'Dental Cleaning': 1200.0,
+        'Grooming': 600.0
+    }
+
+    # Attach prices and total payable to each appointment
+    for a in appointments:
+        price = float(service_prices.get(a.service, 0.0))
+        a.price = price
+        a.total_payable = round(price * 1.12, 2)  # 12% VAT
+
+    return render_template('admin_appointments.html', appointments=appointments)
 
 if __name__ == '__main__':
     app.run(debug=True)

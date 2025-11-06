@@ -6,7 +6,8 @@
     <a class="btn btn-success mb-3" href="{{ url_for('pet_new') }}">➕ Add New Pet</a>
 
     {% if pets %}
-    <table class="table table-striped table-bordered">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
         <thead>
             <tr>
                 <th>Name</th>
@@ -34,6 +35,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
     {% else %}
     <p>No pets found. <a href="{{ url_for('pet_new') }}">Add your first pet</a>.</p>
     {% endif %}

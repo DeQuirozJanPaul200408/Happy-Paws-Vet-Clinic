@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div>
+    <p>Total Users: {{ total_users }}</p>
+    <p>Total Pets: {{ total_pets }}</p>
+    <p>Total Appointments: {{ total_appointments }}</p>
+</div>
+<div>
+    <a href="{{ url_for('admin_users') }}">Manage Users</a> |
+    <a href="{{ url_for('admin_pets') }}">View All Pets</a> |
+    <a href="{{ url_for('admin_appointments') }}">View All Appointments</a>
+</div>
+{% endblock %}

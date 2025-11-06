@@ -7,7 +7,8 @@
         <a href="{{ url_for('appointment_new') }}" class="btn btn-success mb-3">➕ Book Appointment</a>
 
         {% if appointments %}
-            <table class="table table-striped table-hover mt-3">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mt-3">
                 <thead class="table-dark">
                     <tr>
                         <th>Pet</th>
@@ -16,6 +17,7 @@
                         <th>Status</th>
                         <th>Notes</th>
                         <th>Price (₱)</th>
+                        <th>Total Payable (₱)</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -28,6 +30,7 @@
                         <td>{{ a.status }}</td>
                         <td>{{ a.notes or '-' }}</td>
                         <td>₱{{ '%.2f'|format(a.price) }}</td>
+                        <td>₱{{ '%.2f'|format(a.total_payable) }}</td>
                         <td>
                             <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>
                             <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;">
