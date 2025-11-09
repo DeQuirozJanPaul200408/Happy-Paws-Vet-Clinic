@@ -183,31 +183,59 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
-            flash('Email already registered.', 'warning')
-            return redirect(url_for('register'))
-        user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html', form=form)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # AJAX request
+        form = RegistrationForm()
+        if form.validate_on_submit():
+            if User.query.filter_by(email=form.email.data).first():
+                return {'success': False, 'message': 'Email already registered.'}
+            user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
+            db.session.add(user)
+            db.session.commit()
+            return {'success': True, 'message': 'Registration successful!'}
+        else:
+            return {'success': False, 'message': 'Please fill in all fields correctly.'}
+    else:
+        # Regular GET request
+        form = RegistrationForm()
+        if form.validate_on_submit():
+            if User.query.filter_by(email=form.email.data).first():
+                flash('Email already registered.', 'warning')
+                return redirect(url_for('register'))
+            user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
+            db.session.add(user)
+            db.session.commit()
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+        return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and user.password == form.password.data:  # compare directly
-            login_user(user)
-            if user.role == 'admin':
-                return redirect(url_for('admin_dashboard'))
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # AJAX request
+        form = LoginForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            if user and user.password == form.password.data:  # compare directly
+                login_user(user)
+                return {'success': True, 'message': 'Login successful!'}
             else:
-                return redirect(url_for('dashboard'))
-        flash('Invalid credentials.', 'danger')
-    return render_template('login.html', form=form)
+                return {'success': False, 'message': 'Invalid credentials.'}
+        else:
+            return {'success': False, 'message': 'Please fill in all fields correctly.'}
+    else:
+        # Regular GET request
+        form = LoginForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            if user and user.password == form.password.data:  # compare directly
+                login_user(user)
+                if user.role == 'admin':
+                    return redirect(url_for('admin_dashboard'))
+                else:
+                    return redirect(url_for('dashboard'))
+            flash('Invalid credentials.', 'danger')
+        return render_template('login.html', form=form)
 
 
 @app.route('/logout')
@@ -354,6 +382,25 @@ def appointment_new():
             return render_template('appointment_form.html', form=form, title='Book Appointment',
                                    form_action=url_for('appointment_new'))
 
+        # Validate clinic hours
+        weekday = scheduled_date.weekday()  # 0=Mon, 1=Tue, ..., 6=Sun
+        time = scheduled_date.time()
+
+        if weekday == 6:  # Sunday
+            flash('Appointments are not available on Sundays as it is for emergency only. Please choose another day.', 'danger')
+            return render_template('appointment_form.html', form=form, title='Book Appointment',
+                                   form_action=url_for('appointment_new'))
+        elif weekday == 5:  # Saturday
+            if not (time >= datetime.strptime('09:00', '%H:%M').time() and time <= datetime.strptime('16:00', '%H:%M').time()):
+                flash('On Saturdays, appointments are only available from 9:00 AM to 4:00 PM. Please choose a valid time.', 'danger')
+                return render_template('appointment_form.html', form=form, title='Book Appointment',
+                                       form_action=url_for('appointment_new'))
+        else:  # Monday to Friday
+            if time >= datetime.strptime('18:00', '%H:%M').time() or time <= datetime.strptime('07:59', '%H:%M').time():
+                flash('On weekdays (Monday to Friday), appointments are not available from 6:00 PM to 7:59 AM. Please choose a valid time.', 'danger')
+                return render_template('appointment_form.html', form=form, title='Book Appointment',
+                                       form_action=url_for('appointment_new'))
+
         appt = Appointment(
             pet_id=form.pet_id.data,
             owner_id=current_user.id,
@@ -391,6 +438,25 @@ def appointment_edit(id):
             flash('You cannot set the appointment to today or a past date. Please choose a future date.', 'danger')
             return render_template('appointment_form.html', form=form, title='Edit Appointment',
                                    form_action=url_for('appointment_edit', id=id))
+
+        # Validate clinic hours
+        weekday = scheduled_date.weekday()  # 0=Mon, 1=Tue, ..., 6=Sun
+        time = scheduled_date.time()
+
+        if weekday == 6:  # Sunday
+            flash('Appointments are not available on Sundays as it is for emergency only. Please choose another day.', 'danger')
+            return render_template('appointment_form.html', form=form, title='Edit Appointment',
+                                   form_action=url_for('appointment_edit', id=id))
+        elif weekday == 5:  # Saturday
+            if not (time >= datetime.strptime('09:00', '%H:%M').time() and time <= datetime.strptime('16:00', '%H:%M').time()):
+                flash('On Saturdays, appointments are only available from 9:00 AM to 4:00 PM. Please choose a valid time.', 'danger')
+                return render_template('appointment_form.html', form=form, title='Edit Appointment',
+                                       form_action=url_for('appointment_edit', id=id))
+        else:  # Monday to Friday
+            if time >= datetime.strptime('18:00', '%H:%M').time() or time <= datetime.strptime('07:59', '%H:%M').time():
+                flash('On weekdays (Monday to Friday), appointments are not available from 6:00 PM to 7:59 AM. Please choose a valid time.', 'danger')
+                return render_template('appointment_form.html', form=form, title='Edit Appointment',
+                                       form_action=url_for('appointment_edit', id=id))
 
         appt.pet_id = form.pet_id.data
         appt.service = form.service.data

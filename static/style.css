@@ -2,11 +2,11 @@
 /* ---------- BASE ---------- */
 body {
     padding-bottom: 120px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Nunito', sans-serif; /* Changed to match base.html */
     margin: 0;
     padding: 90px 0 80px 0; /* Top padding for fixed header, bottom for fixed footer */
-    background-image: url('static/images/vet.png');
-    background-size: 100% 100%;
+    background-image: url('Images/vet.png'); /* Fixed path */
+    background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -21,13 +21,34 @@ html, body {
     width: 100%;
 }
 
+/* ---------- VET CLINIC THEME COLORS ---------- */
+.vet-primary {
+    color: #228B22; /* Forest Green */
+}
+
+.vet-secondary {
+    color: #32CD32; /* Lime Green */
+}
+
+.vet-accent {
+    color: #90EE90; /* Light Green */
+}
+
+.vet-warning {
+    color: #FFD700; /* Gold */
+}
+
+.vet-emergency {
+    color: #DC143C; /* Crimson */
+}
+
 a {
-    color: #1abc9c;
+    color: #90EE90; /* Light green */
     text-decoration: none;
 }
 
 a:hover {
-    color: #16a085;
+    color: #32CD32; /* Lime green */
 }
 
 /* ---------- HEADER ---------- */
@@ -37,10 +58,10 @@ header {
     left: 0;
     width: 100%;
     z-index: 1000;             /* Keeps header above content */
-    background: rgba(31, 31, 31, 0.85); /* Semi-transparent dark */
+    background: rgba(34, 139, 34, 0.9); /* Forest green */
     backdrop-filter: blur(10px);       /* Glass blur effect */
     -webkit-backdrop-filter: blur(10px); /* Safari support */
-    color: #1abc9c;
+    color: #fff;
     padding: 1.5rem 0;
     text-align: center;
     box-shadow: 0 2px 15px rgba(0,0,0,0.5);
@@ -54,13 +75,13 @@ header h1 {
 
 /* ---------- NAVIGATION ---------- */
 nav a {
-    color: #1abc9c;
+    color: #90EE90; /* Light green */
     margin: 0 15px;
     font-weight: 600;
 }
 
 nav a:hover {
-    color: #16a085;
+    color: #32CD32; /* Lime green */
 }
 
 /* ---------- MAIN CONTENT ---------- */
@@ -241,6 +262,55 @@ th {
     min-height: 100vh;
     background: transparent;
 }
+
+/* ---------- FALLING PAWS ANIMATION ---------- */
+.falling-paws {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.paw {
+    position: absolute;
+    font-size: 2rem;
+    animation: fall linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.7;
+    }
+    90% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Individual paw delays and positions */
+.paw1 { left: 10%; animation-duration: 10s; animation-delay: 0s; }
+.paw2 { left: 20%; animation-duration: 12s; animation-delay: 1s; }
+.paw3 { left: 30%; animation-duration: 8s; animation-delay: 2s; }
+.paw4 { left: 40%; animation-duration: 14s; animation-delay: 0.5s; }
+.paw5 { left: 50%; animation-duration: 9s; animation-delay: 3s; }
+.paw6 { left: 60%; animation-duration: 11s; animation-delay: 1.5s; }
+.paw7 { left: 70%; animation-duration: 13s; animation-delay: 2.5s; }
+.paw8 { left: 80%; animation-duration: 7s; animation-delay: 4s; }
+.paw9 { left: 15%; animation-duration: 15s; animation-delay: 0.8s; }
+.paw10 { left: 25%; animation-duration: 10s; animation-delay: 3.5s; }
+.paw11 { left: 35%; animation-duration: 12s; animation-delay: 1.2s; }
+.paw12 { left: 45%; animation-duration: 8s; animation-delay: 2.8s; }
 
 .dashboard-container {
     position: relative;

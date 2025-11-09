@@ -2,18 +2,43 @@
 {% block content %}
 <div class="home-wrapper">
 <div class="container">
-    <h2 class="text-center mb-4 text-info fw-bold">Welcome to Happy Paws Vet Clinic</h2>
+<section class="hero-section text-center mb-5">
+        <h1 class="display-4 fw-bold vet-accent mb-3">🏥 Welcome to Happy Paws Vet Clinic 🏥</h1>
+        <p class="lead mb-4">Your trusted partner in pet healthcare. We provide compassionate, professional veterinary services for all your furry friends.</p>
+        <div class="emergency-contact">
+            <h4 class="vet-emergency">🚨 Emergency Contact: 09060210487</h4>
+            <p class="mb-0">Available 24/7 for urgent pet care needs</p>
+        </div>
+    </section>
 
-    <section class="services-section">
-        <h3 class="text-center mb-3">Our Services</h3>
+<section class="clinic-hours mb-5">
+        <h3 class="text-center mb-4 vet-accent">🕒 Clinic Hours</h3>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card vet-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Monday - Friday</h5>
+                        <p class="card-text">8:00 AM - 6:00 PM</p>
+                        <h5 class="card-title">Saturday</h5>
+                        <p class="card-text">9:00 AM - 4:00 PM</p>
+                        <h5 class="card-title">Sunday</h5>
+                        <p class="card-text">Emergency Only</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="services-section mb-5">
+        <h3 class="text-center mb-4 vet-accent">🩺 Our Services</h3>
         <div class="row">
             {% for service in services %}
             <div class="col-md-4 mb-3">
-                <div class="card">
+                <div class="card vet-card">
                     <div class="card-body">
                         <h5 class="card-title text-center">{{ service.title }}</h5>
                         <p class="card-text">{{ service.desc }}</p>
-                        <p class="card-text"><strong>Price: {{ service.price }}</strong></p>
+                        <p class="card-text"><strong>Starting at: ₱{{ service.price }}</strong></p>
                     </div>
                 </div>
             </div>
@@ -21,12 +46,12 @@
         </div>
     </section>
 
-    <section class="staff-section mt-5">
-        <h3 class="text-center mb-3">Our Staff</h3>
+    <section class="staff-section mb-5">
+        <h3 class="text-center mb-4 vet-accent">👨‍⚕️ Our Expert Staff</h3>
         <div class="row">
             {% for member in staff %}
             <div class="col-md-4 mb-3">
-                <div class="card">
+                <div class="card vet-card">
                     <div class="card-body">
                         <h5 class="card-title">{{ member.name }}</h5>
                         <p class="card-text"><em>{{ member.role }}</em></p>
@@ -35,6 +60,28 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+    </section>
+
+<section class="pet-care-tips">
+        <h3 class="text-center mb-4 vet-accent">🐕 Pet Care Tips</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card vet-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Regular Check-ups</h5>
+                        <p class="card-text">Schedule annual wellness exams to keep your pet healthy and catch issues early.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card vet-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Vaccination Schedule</h5>
+                        <p class="card-text">Keep up with vaccinations to protect your pet from preventable diseases.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </div>
