@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="content-container">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-info">🔐 Verify Your OTP</h2>
+                    <p class="text-light">We sent a one-time password to your email. Enter it below to continue.</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} shadow-sm" role="alert">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" class="otp-form">
+                    <div class="mb-4">
+                        <label for="otp" class="form-label fw-semibold text-light">Enter 6-Digit OTP Code</label>
+                        <input type="text" name="otp" class="form-control text-center fs-4 py-3" placeholder="000000" maxlength="6" required style="letter-spacing: 0.5rem;">
+                    </div>
+                    <button type="submit" class="btn btn-primary fw-bold w-100 py-3 fs-5">Verify OTP</button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-light mb-2">Didn't receive the code?</p>
+                    <button class="btn btn-outline-light btn-sm" onclick="resendOTP()">Resend OTP</button>
+                    <p class="text-muted small mt-3">OTP expires in 10 minutes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function resendOTP() {
+    // Add resend functionality here
+    showToast('OTP resent to your email! 📧', 'success');
+}
+
+function showToast(message, type = 'info') {
+    const toastContainer = document.querySelector('.toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'primary'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+
+    // Remove toast from DOM after it's hidden
+    toast.addEventListener('hidden.bs.toast', function() {
+        toast.remove();
+    });
+}
+</script>
+{% endblock %}

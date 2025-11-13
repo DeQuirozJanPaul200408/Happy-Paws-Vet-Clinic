@@ -1,5 +1,4 @@
-
-from flask import Flask, render_template, redirect, url_for, flash, request, abort
+from flask import Flask, render_template, redirect, url_for, flash, request, abort, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, DateTimeField
@@ -8,11 +7,18 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+import random
+from dotenv import load_dotenv
+from otp import send_and_store_otp, verify_otp
+from db import execute
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', 'dev-secret-key')
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET', 'dev-secret-key')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/vetclinic'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{os.getenv("DB_USER")}:{os.getenv("DB_PASSWORD")}@{os.getenv("DB_HOST")}:{os.getenv("DB_PORT")}/{os.getenv("DB_NAME")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -140,6 +146,7 @@ class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(), Length(6, 128)])
     password2 = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    otp = StringField('OTP Code', validators=[Optional(), Length(6, 6)])
     submit = SubmitField('Register')
 
 class LoginForm(FlaskForm):
@@ -168,13 +175,45 @@ def load_user(user_id):
 @app.before_request
 def create_tables_once():
     if not getattr(app, 'db_initialized', False):
-        db.create_all()
-        # Create default admin user if not exists
-        if not User.query.filter_by(email='administrator@gmail.com').first():
-            admin_user = User(name='Admin', email='administrator@gmail.com', password='admin123', role='admin')
-            db.session.add(admin_user)
-            db.session.commit()
-        app.db_initialized = True
+        try:
+            db.create_all()
+            # Create default admin user if not exists
+            if not User.query.filter_by(email='vetclinicadmin@gmail.com').first():
+                admin_user = User(name='Admin', email='vetclinicadmin@gmail.com', password='admin123', role='admin')
+                db.session.add(admin_user)
+                db.session.commit()
+
+            # Create raw SQL tables for OTP functionality
+            from db import execute
+            # Create otp_register table
+            execute("""
+            CREATE TABLE IF NOT EXISTS otp_register (
+                id INT NOT NULL AUTO_INCREMENT,
+                user_id INT DEFAULT NULL,
+                otp_code VARCHAR(10) DEFAULT NULL,
+                type VARCHAR(20) DEFAULT NULL,
+                email VARCHAR(120) DEFAULT NULL,
+                expires_at DATETIME DEFAULT NULL,
+                created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            """)
+            # Create otp_login table
+            execute("""
+            CREATE TABLE IF NOT EXISTS otp_login (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                otp_code VARCHAR(10) NOT NULL,
+                entered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status VARCHAR(20) NOT NULL
+            );
+            """)
+
+            app.db_initialized = True
+        except Exception as e:
+            print(f"Database initialization failed: {e}")
+            # Continue without database for now
+            pass
 
 # ------------------- ROUTES -------------------
 @app.route('/')
@@ -189,10 +228,27 @@ def register():
         if form.validate_on_submit():
             if User.query.filter_by(email=form.email.data).first():
                 return {'success': False, 'message': 'Email already registered.'}
-            user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
-            db.session.add(user)
-            db.session.commit()
-            return {'success': True, 'message': 'Registration successful!'}
+            if not form.otp.data:
+                # Send OTP and prompt for verification
+                if send_and_store_otp(0, form.email.data, 'registration'):  # Use 0 as temp user_id
+                    session['pending_registration'] = {
+                        'name': form.name.data,
+                        'email': form.email.data,
+                        'password': form.password.data
+                    }
+                    return {'success': True, 'message': 'OTP sent to your email. Please enter the OTP to complete registration.', 'require_otp': True}
+                else:
+                    return {'success': False, 'message': 'Failed to send OTP.'}
+            else:
+                # Verify OTP
+                if verify_otp(0, form.otp.data, 'registration', form.email.data):
+                    user = User(name=form.name.data, email=form.email.data, password=form.password.data)
+                    db.session.add(user)
+                    db.session.commit()
+                    session.pop('pending_registration', None)
+                    return {'success': True, 'message': 'Registration successful!'}
+                else:
+                    return {'success': False, 'message': 'Invalid or expired OTP.'}
         else:
             return {'success': False, 'message': 'Please fill in all fields correctly.'}
     else:
@@ -202,40 +258,86 @@ def register():
             if User.query.filter_by(email=form.email.data).first():
                 flash('Email already registered.', 'warning')
                 return redirect(url_for('register'))
-            user = User(name=form.name.data, email=form.email.data, password=form.password.data)  # store plain password
-            db.session.add(user)
-            db.session.commit()
-            flash('Registration successful! Please login.', 'success')
-            return redirect(url_for('login'))
+            if not form.otp.data:
+                # Send OTP and redirect to verify
+                if send_and_store_otp(0, form.email.data, 'registration'):
+                    session['pending_registration'] = {
+                        'name': form.name.data,
+                        'email': form.email.data,
+                        'password': form.password.data
+                    }
+                    flash('OTP sent to your email. Please verify.', 'info')
+                    return redirect(url_for('verify_otp_page'))
+                else:
+                    flash('Failed to send OTP.', 'danger')
+            else:
+                # Verify OTP
+                if verify_otp(0, form.otp.data, 'registration'):
+                    user = User(name=form.name.data, email=form.email.data, password=form.password.data)
+                    db.session.add(user)
+                    db.session.commit()
+                    session.pop('pending_registration', None)
+                    flash('Registration successful! Please login.', 'success')
+                    return redirect(url_for('login'))
+                else:
+                    flash('Invalid or expired OTP.', 'danger')
         return render_template('register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         # AJAX request
-        form = LoginForm()
-        if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data).first()
-            if user and user.password == form.password.data:  # compare directly
-                login_user(user)
-                return {'success': True, 'message': 'Login successful!'}
-            else:
-                return {'success': False, 'message': 'Invalid credentials.'}
+        email = request.form['email'].lower()
+        password = request.form['password']
+
+        if len(password) < 6:
+            return {'success': False, 'message': 'Password length is incorrect. Minimum 6 characters required.'}
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return {'success': False, 'message': 'Email not registered.'}
+
+        if user.password != password:
+            return {'success': False, 'message': 'Password is incorrect.'}
+
+        # Check user role
+        if user.role == 'admin':
+            login_user(user)
+            return {'success': True, 'redirect': url_for('admin_dashboard')}
         else:
-            return {'success': False, 'message': 'Please fill in all fields correctly.'}
+            # Send OTP for login verification for regular users
+            if send_and_store_otp(user.id, user.email, 'login'):
+                session['pending_user_id'] = user.id
+                return {'success': True, 'redirect': url_for('verify_otp_page')}
+            else:
+                return {'success': False, 'message': 'Failed to send OTP.'}
     else:
         # Regular GET request
-        form = LoginForm()
-        if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data).first()
-            if user and user.password == form.password.data:  # compare directly
-                login_user(user)
-                if user.role == 'admin':
-                    return redirect(url_for('admin_dashboard'))
-                else:
-                    return redirect(url_for('dashboard'))
-            flash('Invalid credentials.', 'danger')
-        return render_template('login.html', form=form)
+        return render_template('login.html')
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+@csrf.exempt
+def verify_otp_page():
+    if request.method == 'POST':
+        otp_code = request.form.get('otp')
+        user_id = session.get('pending_user_id')
+        registration_data = session.get('pending_registration')
+        if user_id and verify_otp(user_id, otp_code, 'login'):
+            user = User.query.get(user_id)
+            login_user(user)
+            session.pop('pending_user_id', None)
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        elif registration_data and verify_otp(0, otp_code, 'registration', registration_data['email']):
+            user = User(name=registration_data['name'], email=registration_data['email'], password=registration_data['password'])
+            db.session.add(user)
+            db.session.commit()
+            session.pop('pending_registration', None)
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid or expired OTP.', 'danger')
+    return render_template('verify_otp.html')
 
 
 @app.route('/logout')
@@ -531,7 +633,7 @@ def admin_user_edit(id):
     if form.validate_on_submit():
         user.name = form.name.data
         user.email = form.email.data
-        user.password = form.password.data  # plain text
+        user.password = form.password.data
         db.session.commit()
         flash('User updated successfully.', 'success')
         return redirect(url_for('admin_users'))
