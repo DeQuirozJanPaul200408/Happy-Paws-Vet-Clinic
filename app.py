@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, abort, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm, CSRFProtect
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, DateTimeField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, DateTimeField, RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +11,7 @@ import random
 from dotenv import load_dotenv
 from otp import send_and_store_otp, verify_otp
 from db import execute
+
 
 # Load environment variables
 load_dotenv()
@@ -65,6 +66,8 @@ class Appointment(db.Model):
     scheduled_at = db.Column(db.DateTime, nullable=False)
     notes = db.Column(db.Text)
     status = db.Column(db.String(30), default='Scheduled')
+    payment_method = db.Column(db.String(50))
+    payment_status = db.Column(db.String(50), default='Pending')
 
 
 SERVICES = [
@@ -166,6 +169,7 @@ class AppointmentForm(FlaskForm):
     service = SelectField('Service', choices=[(s['title'], s['title']) for s in SERVICES])
     scheduled_at = DateTimeField('When', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     notes = TextAreaField('Notes', validators=[Optional()])
+    payment_method = RadioField('Payment Method', choices=[('pay_on_site', 'Pay on the Vet (On-site)'), ('pay_now', 'Pay Now (GCash)')], validators=[DataRequired()])
     submit = SubmitField('Save')
 
 @login_manager.user_loader
@@ -177,7 +181,7 @@ def create_tables_once():
     if not getattr(app, 'db_initialized', False):
         try:
             db.create_all()
-            # Create default admin user if not exists
+            # Create default admin user if not exists  
             if not User.query.filter_by(email='vetclinicadmin@gmail.com').first():
                 admin_user = User(name='Admin', email='vetclinicadmin@gmail.com', password='admin123', role='admin')
                 db.session.add(admin_user)
@@ -211,7 +215,6 @@ def create_tables_once():
 
             app.db_initialized = True
         except Exception as e:
-            print(f"Database initialization failed: {e}")
             # Continue without database for now
             pass
 
@@ -508,10 +511,30 @@ def appointment_new():
             owner_id=current_user.id,
             service=form.service.data,
             scheduled_at=scheduled_date,
-            notes=form.notes.data
+            notes=form.notes.data,
+            payment_method=form.payment_method.data
         )
+        if form.payment_method.data == 'pay_on_site':
+            appt.payment_status = 'Pending Payment (On-site)'
+            appt.status = 'Scheduled'
+        elif form.payment_method.data == 'pay_now':
+            appt.payment_status = 'Pending'
+            appt.status = 'Pending Payment'
         db.session.add(appt)
         db.session.commit()
+        if form.payment_method.data == 'pay_now':
+            # Calculate amount
+            service_prices = {
+                'Wellness Checkup': 500.0,
+                'Vaccination': 800.0,
+                'Surgery': 3000.0,
+                'Deworming': 350.0,
+                'Dental Cleaning': 1200.0,
+                'Grooming': 600.0
+            }
+            price = float(service_prices.get(form.service.data, 0.0))
+            total_payable = round(price * 1.12, 2)  # 12% VAT
+            return redirect(url_for('payment', appointment_id=appt.id, amount=total_payable))
         flash('Appointment booked successfully!', 'success')
         return redirect(url_for('appointments_list'))
 
@@ -530,6 +553,7 @@ def appointment_edit(id):
 
     if request.method == 'GET':
         form.scheduled_at.data = appt.scheduled_at
+        form.payment_method.data = appt.payment_method
 
     if form.validate_on_submit():
         now = datetime.now()
@@ -564,6 +588,7 @@ def appointment_edit(id):
         appt.service = form.service.data
         appt.scheduled_at = scheduled_date
         appt.notes = form.notes.data
+        appt.payment_method = form.payment_method.data
         db.session.commit()
         flash('Appointment updated successfully!', 'success')
         return redirect(url_for('appointments_list'))
@@ -706,5 +731,35 @@ def admin_pet_delete(id):
     flash('Pet deleted successfully.', 'info')
     return redirect(url_for('admin_pets'))
 
+@app.route('/payment/<int:appointment_id>/<float:amount>')
+@login_required
+def payment(appointment_id, amount):
+    # Use static qr.jpg for payment
+    qr_filename = 'qr.jpg'
+    return render_template('payment.html', appointment_id=appointment_id, amount=amount, qr_filename=qr_filename)
+
+@app.route('/confirm_payment/<int:appointment_id>', methods=['GET'])
+@login_required
+def confirm_payment(appointment_id):
+    appt = Appointment.query.get_or_404(appointment_id)
+    if appt.owner != current_user:
+        abort(403)
+    appt.payment_status = 'Paid'
+    appt.status = 'Scheduled'
+    db.session.commit()
+    flash('Payment confirmed! Your appointment is now scheduled.', 'success')
+    return redirect(url_for('appointments_list'))
+
+@app.route('/cancel_payment/<int:appointment_id>', methods=['GET'])
+@login_required
+def cancel_payment(appointment_id):
+    appt = Appointment.query.get_or_404(appointment_id)
+    if appt.owner != current_user:
+        abort(403)
+    db.session.delete(appt)
+    db.session.commit()
+    flash('Appointment cancelled.', 'info')
+    return redirect(url_for('dashboard'))
+
 if __name__ == '__main__':
-     app.run(debug=True, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
+     app.run(debug=False, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))

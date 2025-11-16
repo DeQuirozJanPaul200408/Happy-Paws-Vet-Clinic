@@ -27,7 +27,6 @@ def get_db():
         )
         return conn
     except mysql.connector.Error as err:
-        print("Database connection error:", err)
         raise
 
 
@@ -67,7 +66,6 @@ def execute(query, params=()):
         return lastrowid
     except Exception as e:
         conn.rollback()
-        print("Database execute error:", e)
         raise
     finally:
         cur.close()

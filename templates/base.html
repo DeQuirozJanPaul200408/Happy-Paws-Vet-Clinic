@@ -351,6 +351,9 @@
         /* Navigation Tooltips */
         .nav-tooltip {
             position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 8px 12px;
@@ -359,10 +362,11 @@
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
             z-index: 1001;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 5px;
         }
 
         .nav-link:hover .nav-tooltip {
@@ -431,6 +435,7 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
+                    {% if not (current_user.is_authenticated and current_user.role == 'admin') %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
                             Home
@@ -440,7 +445,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('services') }}">
                             Services
-                            <span class="nav-tooltip">View our veterinary services & pricing</span>
+                            <span class="nav-tooltip">View our veterinary services and pricing</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -449,6 +454,7 @@
                             <span class="nav-tooltip">Meet our experienced veterinary team</span>
                         </a>
                     </li>
+                    {% endif %}
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'admin' %}
                             <li class="nav-item">
