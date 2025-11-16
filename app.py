@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from otp import send_and_store_otp, verify_otp
 from db import execute
 
+
 # Load environment variables
 load_dotenv()
 
@@ -514,8 +515,27 @@ def appointment_new():
             notes=form.notes.data,
             payment_method=form.payment_method.data
         )
+        if form.payment_method.data == 'pay_on_site':
+            appt.payment_status = 'Pending Payment (On-site)'
+            appt.status = 'Scheduled'
+        elif form.payment_method.data == 'pay_now':
+            appt.payment_status = 'Pending'
+            appt.status = 'Pending Payment'
         db.session.add(appt)
         db.session.commit()
+        if form.payment_method.data == 'pay_now':
+            # Calculate amount
+            service_prices = {
+                'Wellness Checkup': 500.0,
+                'Vaccination': 800.0,
+                'Surgery': 3000.0,
+                'Deworming': 350.0,
+                'Dental Cleaning': 1200.0,
+                'Grooming': 600.0
+            }
+            price = float(service_prices.get(form.service.data, 0.0))
+            total_payable = round(price * 1.12, 2)  # 12% VAT
+            return redirect(url_for('payment', appointment_id=appt.id, amount=total_payable))
         flash('Appointment booked successfully!', 'success')
         return redirect(url_for('appointments_list'))
 
@@ -711,6 +731,36 @@ def admin_pet_delete(id):
     db.session.commit()
     flash('Pet deleted successfully.', 'info')
     return redirect(url_for('admin_pets'))
+
+@app.route('/payment/<int:appointment_id>/<float:amount>')
+@login_required
+def payment(appointment_id, amount):
+    # Use static qr.jpg for payment
+    qr_filename = 'qr.jpg'
+    return render_template('payment.html', appointment_id=appointment_id, amount=amount, qr_filename=qr_filename)
+
+@app.route('/confirm_payment/<int:appointment_id>', methods=['GET'])
+@login_required
+def confirm_payment(appointment_id):
+    appt = Appointment.query.get_or_404(appointment_id)
+    if appt.owner != current_user:
+        abort(403)
+    appt.payment_status = 'Paid'
+    appt.status = 'Scheduled'
+    db.session.commit()
+    flash('Payment confirmed! Your appointment is now scheduled.', 'success')
+    return redirect(url_for('appointments_list'))
+
+@app.route('/cancel_payment/<int:appointment_id>', methods=['GET'])
+@login_required
+def cancel_payment(appointment_id):
+    appt = Appointment.query.get_or_404(appointment_id)
+    if appt.owner != current_user:
+        abort(403)
+    db.session.delete(appt)
+    db.session.commit()
+    flash('Appointment cancelled.', 'info')
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
