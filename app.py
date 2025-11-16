@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, abort, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm, CSRFProtect
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, DateTimeField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, DateTimeField, RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Optional
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -65,6 +65,8 @@ class Appointment(db.Model):
     scheduled_at = db.Column(db.DateTime, nullable=False)
     notes = db.Column(db.Text)
     status = db.Column(db.String(30), default='Scheduled')
+    payment_method = db.Column(db.String(50))
+    payment_status = db.Column(db.String(50), default='Pending')
 
 
 SERVICES = [
@@ -166,6 +168,7 @@ class AppointmentForm(FlaskForm):
     service = SelectField('Service', choices=[(s['title'], s['title']) for s in SERVICES])
     scheduled_at = DateTimeField('When', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     notes = TextAreaField('Notes', validators=[Optional()])
+    payment_method = RadioField('Payment Method', choices=[('pay_on_site', 'Pay on the Vet (On-site)'), ('pay_now', 'Pay Now (GCash)')], validators=[DataRequired()])
     submit = SubmitField('Save')
 
 @login_manager.user_loader
@@ -177,7 +180,7 @@ def create_tables_once():
     if not getattr(app, 'db_initialized', False):
         try:
             db.create_all()
-            # Create default admin user if not exists
+            # Create default admin user if not exists  
             if not User.query.filter_by(email='vetclinicadmin@gmail.com').first():
                 admin_user = User(name='Admin', email='vetclinicadmin@gmail.com', password='admin123', role='admin')
                 db.session.add(admin_user)
@@ -508,7 +511,8 @@ def appointment_new():
             owner_id=current_user.id,
             service=form.service.data,
             scheduled_at=scheduled_date,
-            notes=form.notes.data
+            notes=form.notes.data,
+            payment_method=form.payment_method.data
         )
         db.session.add(appt)
         db.session.commit()
@@ -530,6 +534,7 @@ def appointment_edit(id):
 
     if request.method == 'GET':
         form.scheduled_at.data = appt.scheduled_at
+        form.payment_method.data = appt.payment_method
 
     if form.validate_on_submit():
         now = datetime.now()
@@ -564,6 +569,7 @@ def appointment_edit(id):
         appt.service = form.service.data
         appt.scheduled_at = scheduled_date
         appt.notes = form.notes.data
+        appt.payment_method = form.payment_method.data
         db.session.commit()
         flash('Appointment updated successfully!', 'success')
         return redirect(url_for('appointments_list'))

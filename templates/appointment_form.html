@@ -30,6 +30,11 @@
                 {{ form.notes(class="form-control", rows="3", placeholder="Add notes (optional)") }}
             </div>
 
+            <div class="mb-3">
+                <label for="payment_method" class="form-label text-white fw-semibold">{{ form.payment_method.label.text }}</label>
+                {{ form.payment_method(class="form-control") }}
+            </div>
+
             {{ form.submit(class="btn btn-info w-100 fw-bold") }}
         </form>
     </div>
