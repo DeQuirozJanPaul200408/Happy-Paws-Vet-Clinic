@@ -68,6 +68,7 @@ class Appointment(db.Model):
     status = db.Column(db.String(30), default='Scheduled')
     payment_method = db.Column(db.String(50))
     payment_status = db.Column(db.String(50), default='Pending')
+    reference_number = db.Column(db.String(255))
 
 
 SERVICES = [
@@ -749,6 +750,9 @@ def confirm_payment(appointment_id):
     appt = Appointment.query.get_or_404(appointment_id)
     if appt.owner != current_user:
         abort(403)
+    reference_number = request.form.get('reference_number')
+    if reference_number:
+        appt.reference_number = reference_number
     appt.payment_status = 'Paid'
     appt.status = 'Scheduled'
     db.session.commit()
