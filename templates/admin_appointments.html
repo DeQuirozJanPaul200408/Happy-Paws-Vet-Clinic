@@ -14,6 +14,9 @@
                     <th scope="col">Service</th>
                     <th scope="col">Scheduled At</th>
                     <th scope="col">Status</th>
+                    <th scope="col">Payment Method</th>
+                    <th scope="col">Reference Number</th>
+                    <th scope="col">Payment Status</th>
                     <th scope="col">Total Payable</th>
                     <th scope="col">Actions</th>
                 </tr>
@@ -27,14 +30,27 @@
                     <td>{{ appointment.service }}</td>
                     <td>{{ appointment.scheduled_at }}</td>
                     <td>{{ appointment.status }}</td>
+                    <td>{{ appointment.payment_method }}</td>
+                    <td>{{ appointment.reference_number or 'N/A' }}</td>
+                    <td>{{ appointment.payment_status }}</td>
                     <td>₱{{ "%.2f"|format(appointment.total_payable) }}</td>
                     <td>
-                        <form method="POST" action="{{ url_for('admin_appointment_delete', id=appointment.id) }}" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                onclick="return confirm('Are you sure you want to delete this appointment?')">
-                                Delete
-                            </button>
-                        </form>
+                        <div class="d-flex gap-2">
+                            {% if appointment.payment_method == 'On-Site' %}
+                            <form method="POST" action="{{ url_for('admin_update_payment_status', id=appointment.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success"
+                                    onclick="return confirm('Mark this payment as Paid?')">
+                                    Mark as Paid
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('admin_appointment_delete', id=appointment.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Are you sure you want to delete this appointment?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

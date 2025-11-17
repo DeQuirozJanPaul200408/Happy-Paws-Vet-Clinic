@@ -1,64 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container my-5">
-    <h2 class="text-center mb-5 text-info fw-bold">Our Veterinary Services</h2>
+<div class="services-wrapper">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold mb-3">🩺 Our Veterinary Services</h2>
+            <p class="lead">Comprehensive healthcare services for your beloved pets</p>
+        </div>
 
-    <div class="services-wrapper">
         <div class="row g-4">
             {% for service in services %}
-            <div class="col-md-4">
-                <div class="service-card p-4 h-100 text-center">
-                    <h5 class="fw-bold mb-3">{{ service.title }}</h5>
-                    <p class="mb-3">{{ service.desc }}</p>
-                    <p class="fw-semibold text-warning">Price: {{ service.price }}</p>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column text-center">
+                        <div class="mb-3">
+                            {% if 'Vaccination' in service.title %}
+                                <i class="fas fa-syringe text-primary" style="font-size: 3rem;"></i>
+                            {% elif 'Check-up' in service.title or 'Examination' in service.title %}
+                                <i class="fas fa-stethoscope text-success" style="font-size: 3rem;"></i>
+                            {% elif 'Surgery' in service.title %}
+                                <i class="fas fa-user-md text-danger" style="font-size: 3rem;"></i>
+                            {% elif 'Dental' in service.title %}
+                                <i class="fas fa-tooth text-info" style="font-size: 3rem;"></i>
+                            {% elif 'Grooming' in service.title %}
+                                <i class="fas fa-cut text-warning" style="font-size: 3rem;"></i>
+                            {% else %}
+                                <i class="fas fa-heartbeat text-secondary" style="font-size: 3rem;"></i>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">{{ service.title }}</h5>
+                        <p class="card-text flex-grow-1 mb-3">{{ service.desc }}</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-primary fs-6 px-3 py-2">{{ service.price }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+
+
     </div>
 </div>
-
-<style>
-/* Scrollbar Styling */
-.services-wrapper::-webkit-scrollbar {
-    width: 8px;
-}
-
-.services-wrapper::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-.services-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-}
-
-/* Service Card */
-.service-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-.service-card h5 {
-    color: #fff;
-}
-
-.service-card p {
-    color: #f0f0f0;
-}
-
-.service-card .text-warning {
-    color: #ffd700;
-}
-</style>
 {% endblock %}

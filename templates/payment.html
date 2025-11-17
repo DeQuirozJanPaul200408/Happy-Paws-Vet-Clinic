@@ -9,12 +9,21 @@
                     <h4>GCash Payment</h4>
                 </div>
                 <div class="card-body text-center">
-                    <p class="mb-3">Scan the QR code below to pay ₱{{ "%.2f"|format(amount) }} for your appointment.</p>
-                    <img src="{{ url_for('static', filename=qr_filename) }}" alt="GCash QR Code" class="img-fluid mb-3" style="max-width: 200px;">
+                    <p class="mb-3">Scan the QR code below to pay ₱{{ "%.2f"|format(total_amount) }} for your appointment.</p>
+                    <img src="{{ url_for('static', filename='qr.jpg') }}" alt="GCash QR Code" class="img-fluid mb-3" style="max-width: 200px;">
                     <p class="text-muted">GCash Number: 09060210487</p>
-                    <p class="text-muted">Amount: ₱{{ "%.2f"|format(amount) }}</p>
-                    <a href="{{ url_for('confirm_payment', appointment_id=appointment_id) }}" class="btn btn-success">I Have Paid</a>
-                    <a href="{{ url_for('cancel_payment', appointment_id=appointment_id) }}" class="btn btn-secondary ms-2">Cancel</a>
+                    <p class="text-muted">Subtotal: ₱{{ "%.2f"|format(amount) }}</p>
+                    <p class="text-muted">VAT (12%): ₱{{ "%.2f"|format(vat) }}</p>
+                    <p class="text-muted">Total Amount: ₱{{ "%.2f"|format(total_amount) }}</p>
+                    <form method="POST" action="{{ url_for('confirm_payment', appointment_id=appointment_id) }}" class="mb-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="mb-3">
+                            <label for="reference_number" class="form-label">GCash Reference Number</label>
+                            <input type="text" class="form-control" id="reference_number" name="reference_number" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Confirm Payment</button>
+                    </form>
+                    <a href="{{ url_for('cancel_payment', appointment_id=appointment_id) }}" class="btn btn-secondary">Cancel</a>
                 </div>
             </div>
         </div>

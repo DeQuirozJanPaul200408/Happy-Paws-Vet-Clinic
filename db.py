@@ -1,5 +1,5 @@
 import os
-import mysql.connector
+import sqlite3
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -8,25 +8,11 @@ load_dotenv()
 # DATABASE CONNECTION
 def get_db():
     try:
-        # Convert port to int if provided
-        db_port = os.getenv("DB_PORT")
-        if db_port:
-            try:
-                db_port = int(db_port)
-            except ValueError:
-                # keep as string and let connector decide
-                pass
-
-        conn = mysql.connector.connect(
-            host=os.getenv("DB_HOST"),
-            port=db_port,
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            autocommit=False  # control commits explicitly
-        )
+        db_path = os.path.join(os.path.dirname(__file__), 'instance', 'vetclinic.db')
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row  # Enable column access by name
         return conn
-    except mysql.connector.Error as err:
+    except sqlite3.Error as err:
         raise
 
 
@@ -34,7 +20,7 @@ def get_db():
 def query_all(query, params=()):
     conn = get_db()
     try:
-        cur = conn.cursor(dictionary=True)
+        cur = conn.cursor()
         cur.execute(query, params)
         data = cur.fetchall()
         return data
@@ -46,7 +32,7 @@ def query_all(query, params=()):
 def query_one(query, params=()):
     conn = get_db()
     try:
-        cur = conn.cursor(dictionary=True)
+        cur = conn.cursor()
         cur.execute(query, params)
         row = cur.fetchone()
         return row

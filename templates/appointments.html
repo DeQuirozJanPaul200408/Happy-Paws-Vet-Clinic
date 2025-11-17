@@ -17,8 +17,9 @@
                     <th>Service</th>
                     <th>Scheduled At</th>
                     <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Reference Number</th>
                     <th>Total Payable</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,15 +31,9 @@
                     <td>{{ appointment.service }}</td>
                     <td>{{ appointment.scheduled_at }}</td>
                     <td>{{ appointment.status }}</td>
+                    <td>{{ appointment.payment_method }}</td>
+                    <td>{{ appointment.reference_number or 'N/A' }}</td>
                     <td>₱{{ "%.2f"|format(appointment.total_payable) }}</td>
-                    <td>
-                        <form method="POST" action="{{ url_for('admin_appointment_delete', id=appointment.id) }}" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-danger mb-1"
-                                onclick="return confirm('Are you sure you want to delete this appointment?')">
-                                🗑️ Delete
-                            </button>
-                        </form>
-                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

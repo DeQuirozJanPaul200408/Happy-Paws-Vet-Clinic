@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, redirect, url_for, flash, request, abort, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm, CSRFProtect
@@ -168,7 +169,7 @@ class AppointmentForm(FlaskForm):
     service = SelectField('Service', choices=[(s['title'], s['title']) for s in SERVICES])
     scheduled_at = DateTimeField('When', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     notes = TextAreaField('Notes', validators=[Optional()])
-    payment_method = RadioField('Payment Method', choices=[('pay_on_site', 'Pay on the Vet (On-site)'), ('pay_now', 'Pay Now (GCash)')], validators=[DataRequired()])
+    payment_method = RadioField('Payment Method', choices=[('pay_on_site', 'Pay on the Vet (On-site)'), ('pay_now', 'Pay Now (GCash)')], default='pay_now', validators=[DataRequired()])
     submit = SubmitField('Save')
 
 @login_manager.user_loader
@@ -733,11 +734,16 @@ def admin_pet_delete(id):
 @app.route('/payment/<int:appointment_id>/<float:amount>')
 @login_required
 def payment(appointment_id, amount):
-    # Use static qr.jpg for payment
-    qr_filename = 'qr.jpg'
-    return render_template('payment.html', appointment_id=appointment_id, amount=amount, qr_filename=qr_filename)
+    appt = Appointment.query.get_or_404(appointment_id)
+    if appt.owner != current_user:
+        abort(403)
+    # amount is total_payable (subtotal + vat)
+    # Calculate subtotal and vat
+    subtotal = round(amount / 1.12, 2)
+    vat = round(amount - subtotal, 2)
+    return render_template('payment.html', appointment_id=appointment_id, amount=subtotal, vat=vat, total_amount=amount)
 
-@app.route('/confirm_payment/<int:appointment_id>', methods=['GET'])
+@app.route('/confirm_payment/<int:appointment_id>', methods=['POST'])
 @login_required
 def confirm_payment(appointment_id):
     appt = Appointment.query.get_or_404(appointment_id)

@@ -2,70 +2,70 @@
 {% block content %}
 <div class="dashboard-wrapper">
     <div class="dashboard-container">
-        <h2 class="text-center mb-4 text-info fw-bold">Welcome to Happy Paws Vet Clinic</h2> 
-        <h2 class="mb-4">{{ title }}</h2> 
-        <div class="mb-4 text-center"> 
-            <a href="{{ url_for('pet_new') }}" class="btn btn-primary btn-lg me-3"> 🐾 Add Pet Details </a> 
-            <a href="{{ url_for('appointment_new') }}" class="btn btn-success btn-lg"> 📅 Book Appointment </a> 
-        </div> 
+        <h2 class="text-center mb-4 text-info fw-bold">Welcome to Happy Paws Vet Clinic</h2>
+        <h2 class="mb-4">{{ title }}</h2>
+        <div class="mb-4 text-center">
+            <a href="{{ url_for('pet_new') }}" class="btn btn-primary btn-lg me-3"> 🐾 Add Pet Details </a>
+            <a href="{{ url_for('appointment_new') }}" class="btn btn-success btn-lg"> 📅 Book Appointment </a>
+        </div>
 
-        <!-- PET SECTION --> 
-        <section class="mb-5"> 
-            <h3>Your Pets</h3> 
-            {% if pets %} 
-                <ul class="list-group"> 
-                    {% for pet in pets %} 
-                        <li class="list-group-item d-flex justify-content-between align-items-center"> 
-                            <div> 
-                                <strong>{{ pet.name }}</strong> - {{ pet.breed or 'Unknown Breed' }} ({{ pet.age or '?' }} yrs) 
-                            </div> 
-                            <div> 
-                                <a href="{{ url_for('pet_edit', id=pet.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a> 
-                                <form action="{{ url_for('pet_delete', id=pet.id) }}" method="POST" style="display:inline;"> 
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this pet?')">🗑️ Delete</button> 
-                                </form> 
-                            </div> 
-                        </li> 
-                    {% endfor %} 
-                </ul> 
-            {% else %} 
-                <p>You have no pets yet.</p> 
-            {% endif %} 
-        </section> 
+        <!-- PET SECTION -->
+        <section class="mb-5">
+            <h3>Your Pets</h3>
+            {% if pets %}
+                <ul class="list-group">
+                    {% for pet in pets %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ pet.name }}</strong> - {{ pet.breed or 'Unknown Breed' }} ({{ pet.age or '?' }} yrs)
+                            </div>
+                            <div>
+                                <a href="{{ url_for('pet_edit', id=pet.id) }}" class="btn btn-sm btn-primary me-1">✏️ Edit</a>
+                                <form action="{{ url_for('pet_delete', id=pet.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this pet?')">🗑️ Delete</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You have no pets yet.</p>
+            {% endif %}
+        </section>
 
-        <!-- APPOINTMENTS SECTION --> 
-        <section> 
-            <h3>Your Appointments</h3> 
-            {% if appointments %} 
-                <ul class="list-group"> 
-                    {% for a in appointments %} 
-                        <li class="list-group-item d-flex justify-content-between align-items-center"> 
-                            <div> 
-                                <strong>{{ a.service }}</strong> for <strong>{{ a.pet.name }}</strong><br> 
-                                <small>{{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') }} ({{ a.status }})</small> 
-                            </div> 
-                            <div class="text-end"> 
-                                <p class="mb-0 text-success fw-bold">₱{{ '%.2f'|format(a.price) }}</p> 
-                                <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1 mt-1">✏️ Edit</a> 
-                                <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;"> 
-                                    <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Are you sure you want to cancel this appointment?')">🗑️ Delete</button> 
-                                </form> 
-                            </div> 
-                        </li> 
-                    {% endfor %} 
-                </ul> 
+        <!-- APPOINTMENTS SECTION -->
+        <section>
+            <h3>Your Appointments</h3>
+            {% if appointments %}
+                <ul class="list-group">
+                    {% for a in appointments %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ a.service }}</strong> for <strong>{{ a.pet.name }}</strong><br>
+                                <small>{{ a.scheduled_at.strftime('%Y-%m-%d %H:%M') }} ({{ a.status }})</small>
+                            </div>
+                            <div class="text-end">
+                                <p class="mb-0 text-success fw-bold">₱{{ '%.2f'|format(a.price) }}</p>
+                                <a href="{{ url_for('appointment_edit', id=a.id) }}" class="btn btn-sm btn-primary me-1 mt-1">✏️ Edit</a>
+                                <form action="{{ url_for('appointment_delete', id=a.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Are you sure you want to cancel this appointment?')">🗑️ Delete</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
 
-                <!-- TOTAL PAYABLE --> 
+                <!-- TOTAL PAYABLE -->
                 <div class="mt-4 p-3 border rounded text-end shadow-sm" style="background-color: transparent;">
-                    <p class="mb-1 fw-semibold">Subtotal: ₱{{ '%.2f'|format(subtotal) }}</p> 
-                    <p class="mb-1 fw-semibold">VAT (12%): ₱{{ '%.2f'|format(vat) }}</p> 
-                    <h4 class="text-success fw-bold">💰 Total Payable: ₱{{ '%.2f'|format(total_payable) }}</h4> 
+                    <p class="mb-1 fw-semibold text-success">Subtotal: ₱{{ '%.2f'|format(subtotal) }}</p>
+                    <p class="mb-1 fw-semibold text-success">VAT (12%): ₱{{ '%.2f'|format(vat) }}</p>
+                    <h4 class="text-success fw-bold">💰 Total Payable: ₱{{ '%.2f'|format(total_payable) }}</h4>
                 </div>
 
-            {% else %} 
-                <p>No appointments yet.</p> 
-            {% endif %} 
-        </section> 
-    </div> 
-</div> 
+            {% else %}
+                <p>No appointments yet.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
 {% endblock %}

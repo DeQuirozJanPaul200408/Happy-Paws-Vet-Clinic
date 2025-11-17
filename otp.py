@@ -45,26 +45,26 @@ def store_otp(user_id, otp_code, otp_type='login', email=None):
     expires_at = datetime.now() + timedelta(minutes=10)
 
     if otp_type == 'registration':
-        execute("INSERT INTO otp_register (user_id, otp_code, type, expires_at, email) VALUES (%s, %s, %s, %s, %s)",
+        execute("INSERT INTO otp_register (user_id, otp_code, type, expires_at, email) VALUES (?, ?, ?, ?, ?)",
                 (user_id, otp_code, otp_type, expires_at, email))
     else:  # login
-        execute("INSERT INTO otp_register (user_id, otp_code, type, expires_at) VALUES (%s, %s, %s, %s)",
+        execute("INSERT INTO otp_register (user_id, otp_code, type, expires_at) VALUES (?, ?, ?, ?)",
                 (user_id, otp_code, otp_type, expires_at))
 def verify_otp(user_id, otp_code, otp_type='login', email=None):
     """Verify OTP and delete if valid."""
-    otp_row = query_one("SELECT * FROM otp_register WHERE user_id=%s AND otp_code=%s AND type=%s AND expires_at > NOW()",
+    otp_row = query_one("SELECT * FROM otp_register WHERE user_id=? AND otp_code=? AND type=? AND expires_at > datetime('now')",
                         (user_id, otp_code, otp_type))
     if otp_row:
         # Log the entered OTP only for real users (not temp 0) and only on success
         if user_id != 0 and otp_type == 'login':
-            execute("INSERT INTO otp_login (user_id, otp_code, status) VALUES (%s, %s, %s)",
+            execute("INSERT INTO otp_login (user_id, otp_code, status) VALUES (?, ?, ?)",
                     (user_id, otp_code, 'success'))
         # For registration, store the entered OTP in otp_register
         if otp_type == 'registration' and email:
-            execute("INSERT INTO otp_register (user_id, otp_code, type, email) VALUES (%s, %s, %s, %s)",
+            execute("INSERT INTO otp_register (user_id, otp_code, type, email) VALUES (?, ?, ?, ?)",
                     (user_id, otp_code, otp_type, email))
         # Delete OTP after use
-        execute("DELETE FROM otp_register WHERE id=%s", (otp_row['id'],))
+        execute("DELETE FROM otp_register WHERE id=?", (otp_row['id'],))
         return True
     return False
 

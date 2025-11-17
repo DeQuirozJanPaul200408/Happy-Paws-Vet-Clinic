@@ -1,55 +1,103 @@
 {% extends "base.html" %}
 
-{% block title %}Verify OTP{% endblock %}
+{% block title %}Verify OTP - Happy Paws Vet Clinic{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="content-container">
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold text-info">🔐 Verify Your OTP</h2>
-                    <p class="text-light">We sent a one-time password to your email. Enter it below to continue.</p>
-                </div>
+<div class="form-wrapper">
+    <div class="form-box">
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-3">Verify Your Email</h2>
+            <p class="text-muted">We sent a 6-digit code to your email address. Please enter it below to complete your registration.</p>
+        </div>
 
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="flash-messages">
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} shadow-sm" role="alert">{{ message }}</div>
-                            {% endfor %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    {% endif %}
-                {% endwith %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-                <form method="POST" class="otp-form">
-                    <div class="mb-4">
-                        <label for="otp" class="form-label fw-semibold text-light">Enter 6-Digit OTP Code</label>
-                        <input type="text" name="otp" class="form-control text-center fs-4 py-3" placeholder="000000" maxlength="6" required style="letter-spacing: 0.5rem;">
-                    </div>
-                    <button type="submit" class="btn btn-primary fw-bold w-100 py-3 fs-5">Verify OTP</button>
-                </form>
-
-                <div class="text-center mt-4">
-                    <p class="text-light mb-2">Didn't receive the code?</p>
-                    <button class="btn btn-outline-light btn-sm" onclick="resendOTP()">Resend OTP</button>
-                    <p class="text-muted small mt-3">OTP expires in 10 minutes</p>
+        <form method="POST" class="otp-form">
+            <div class="mb-4">
+                <label for="otp" class="form-label fw-semibold">Enter 6-Digit Code</label>
+                <input type="text" name="otp" class="form-control text-center fs-3 py-3" placeholder="000000" maxlength="6" required style="letter-spacing: 0.5rem; font-weight: bold;">
+                <div class="form-text text-center mt-2">
+                    <small class="text-muted">Check your email for the verification code</small>
                 </div>
             </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold py-3">
+                    <i class="fas fa-check me-2"></i>Verify & Continue
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="text-muted mb-3">Didn't receive the code?</p>
+            <button class="btn btn-outline-primary btn-sm" onclick="resendOTP()">
+                <i class="fas fa-redo me-2"></i>Resend Code
+            </button>
+            <p class="text-muted small mt-3">
+                <i class="fas fa-clock me-1"></i>Code expires in 10 minutes
+            </p>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('register') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Back to Registration
+            </a>
         </div>
     </div>
 </div>
 
 <script>
 function resendOTP() {
-    // Add resend functionality here
-    showToast('OTP resent to your email! 📧', 'success');
+    const button = event.target;
+    const originalText = button.innerHTML;
+
+    // Disable button and show loading state
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+
+    fetch('/resend_otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('New OTP sent to your email! 📧', 'success');
+        } else {
+            showToast('Failed to resend OTP. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Re-enable button and restore original text
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
 }
 
 function showToast(message, type = 'info') {
     const toastContainer = document.querySelector('.toast-container');
     const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'primary'} border-0`;
+    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'primary'} border-0`;
     toast.setAttribute('role', 'alert');
     toast.setAttribute('aria-live', 'assertive');
     toast.setAttribute('aria-atomic', 'true');
@@ -70,5 +118,13 @@ function showToast(message, type = 'info') {
         toast.remove();
     });
 }
+
+// Auto-focus the OTP input field
+document.addEventListener('DOMContentLoaded', function() {
+    const otpInput = document.querySelector('input[name="otp"]');
+    if (otpInput) {
+        otpInput.focus();
+    }
+});
 </script>
 {% endblock %}

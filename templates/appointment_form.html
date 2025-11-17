@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="form-wrapper d-flex justify-content-center align-items-center py-5">
-    <div class="form-box p-4" 
+    <div class="form-box p-4"
          style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); width: 100%; max-width: 500px;">
-        
+
         <h2 class="mb-4 text-center text-info fw-bold">{{ title }}</h2>
 
         <form method="POST" action="{{ form_action }}">
@@ -31,8 +31,17 @@
             </div>
 
             <div class="mb-3">
-                <label for="payment_method" class="form-label text-white fw-semibold">{{ form.payment_method.label.text }}</label>
-                {{ form.payment_method(class="form-control") }}
+                <label class="form-label text-white fw-semibold">{{ form.payment_method.label.text }}</label>
+                <div class="d-flex justify-content-center gap-3">
+                    {% for subfield in form.payment_method %}
+                    <div class="form-check">
+                        {{ subfield(class="form-check-input") }}
+                        <label class="form-check-label text-white" for="{{ subfield.id }}">
+                            {{ subfield.label.text }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
 
             {{ form.submit(class="btn btn-info w-100 fw-bold") }}
@@ -77,4 +86,17 @@
     min-height: 80vh;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+    radios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'pay_now') {
+                this.form.submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
